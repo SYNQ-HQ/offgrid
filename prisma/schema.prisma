@@ -114,6 +114,7 @@ model Reservation {
   referral  String?
   status    String   @default("pending") // pending, confirmed, cancelled
   seats     Int      @default(1)
+  type      String   @default("ticket") // ticket, table
   
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user      User?    @relation(fields: [userId], references: [id])

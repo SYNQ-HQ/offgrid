@@ -195,7 +195,7 @@ export default function MerchForm({
               onValueChange={(value) => handleChange("category", value)}
             >
               <SelectTrigger className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black">
-                <SelectValue />
+                <SelectValue placeholder="Select Category" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="apparel">Apparel</SelectItem>

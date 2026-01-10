@@ -5,7 +5,18 @@ import nodemailer from "nodemailer";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { eventId, name, email, seats = 1, ...otherFields } = body;
+    const { 
+      eventId, 
+      name, 
+      email, 
+      seats = 1, 
+      type = "ticket",
+      phone,
+      instagram,
+      twitter,
+      role,
+      referral
+    } = body;
 
     if (!eventId || !name || !email) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -33,7 +44,12 @@ export async function POST(request) {
           name,
           email,
           seats,
-          ...otherFields,
+          type,
+          phone,
+          instagram,
+          twitter,
+          role,
+          referral,
         },
       });
 
@@ -73,11 +89,14 @@ export async function POST(request) {
              console.log("Using Ethereal (Reservation):", testAccount.user);
         }
 
+        const isTable = body.type === "table";
+        const typeLabel = isTable ? "Table" : "Ticket";
+
         await transporter.sendMail({
             from: `"OffGrid" <${process.env.SMTP_FROM || "noreply@offgrid.com"}>`,
             to: email,
-            subject: "Table Reservation Request - OffGrid",
-            text: `Hi ${name},\n\nYour table reservation request for ${result.eventTitle} has been received.\n\nEvent: ${result.eventTitle}\nDate: ${result.eventDate}\nTables: ${seats}\nPhone: ${body.phone || 'N/A'}\n\nPlease complete your payment via WhatsApp if you haven't already. We'll confirm your reservation once payment is verified.\n\nOffGrid Team`,
+            subject: `${typeLabel} Registration - OffGrid`,
+            text: `Hi ${name},\n\nYour ${typeLabel.toLowerCase()} registration request for ${result.eventTitle} has been received.\n\nEvent: ${result.eventTitle}\nDate: ${result.eventDate}\n${isTable ? `Tables: ${seats}\n` : ""}Phone: ${body.phone || 'N/A'}\n\n${isTable ? "Please complete your payment via WhatsApp if you haven't already. We'll confirm your reservation once payment is verified." : "Please confirm your entry via WhatsApp."}\n\nOffGrid Team`,
         });
     } catch (emailErr) {
         console.error("Failed to send reservation email", emailErr);

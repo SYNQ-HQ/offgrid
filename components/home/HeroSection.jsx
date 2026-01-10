@@ -6,10 +6,28 @@ import Link from "next/link";
 import { createPageUrl } from "@/lib/utils";
 import MobileNav from "./MobileNav";
 import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api";
 
 export default function HeroSection() {
   const { data: session } = useSession();
   const user = session?.user;
+
+  const { data: latestEvent } = useQuery({
+    queryKey: ["latest-upcoming-event"],
+    queryFn: async () => {
+      const events = await apiClient.entities.Event.filter(
+        { status: "upcoming" },
+        "-createdAt",
+        1
+      );
+      return events[0] || null;
+    },
+  });
+
+  const reserveLink = latestEvent 
+    ? `/reserve?eventId=${latestEvent.id}`
+    : "#events";
 
   return (
     <section className="min-h-screen bg-black flex flex-col justify-between relative overflow-hidden">
@@ -226,6 +244,20 @@ export default function HeroSection() {
           {/* NO WI-FI. NO PITCHING. JUST BUILDERS AND VIBES. */}
           NO SCREENS. NO STANDUP. JUST BUILDERS AND VIBES.
         </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.4 }}
+          className="mt-12"
+        >
+          <Link
+            href={reserveLink}
+            className="inline-block border border-[#FF5401] rounded-full text-[#FF5401] hover:bg-[#FF5401] hover:text-white px-8 py-3 text-sm tracking-[0.2em] transition-all duration-300"
+          >
+            RESERVE SPACE
+          </Link>
+        </motion.div>
       </div>
 
       {/* Scroll indicator */}

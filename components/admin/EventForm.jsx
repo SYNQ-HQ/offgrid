@@ -87,7 +87,7 @@ export default function EventForm({
               onValueChange={(value) => handleChange("status", value)}
             >
               <SelectTrigger className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black">
-                <SelectValue />
+                <SelectValue placeholder="Select Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="upcoming">Upcoming</SelectItem>

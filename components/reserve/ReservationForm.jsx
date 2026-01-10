@@ -35,6 +35,7 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
     role: "",
     referral: "",
     seats: 1, // Will be treated as Tables
+    type: "ticket", // ticket or table
   });
 
   const handleChange = (field, value) => {
@@ -56,11 +57,11 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
         <div className="w-16 h-16 bg-[#FF5401] rounded-full flex items-center justify-center mx-auto mb-6">
           <Check className="w-8 h-8 text-white" />
         </div>
-        <h3 className="text-2xl font-light text-black mb-3">
-          Request Sent.
-        </h3>
+        <h3 className="text-2xl font-light text-black mb-3">Request Sent.</h3>
         <p className="text-black/50 text-sm max-w-md mx-auto mb-6">
-          Redirecting you to WhatsApp to complete your table reservation...
+          {formData.type === "table"
+            ? "Redirecting you to WhatsApp to complete your table reservation..."
+            : "Redirecting you to WhatsApp to confirm your free ticket..."}
         </p>
       </motion.div>
     );
@@ -68,6 +69,37 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Reservation Type Selection */}
+      <div className="space-y-4">
+        <Label className="text-black/60 text-xs tracking-wider uppercase">
+          RESERVATION TYPE *
+        </Label>
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => handleChange("type", "ticket")}
+            className={`py-4 px-6 border text-sm tracking-widest transition-all duration-300 ${
+              formData.type === "ticket"
+                ? "bg-black text-white border-black"
+                : "bg-transparent text-black border-black/10 hover:border-[#FF5401]"
+            }`}
+          >
+            FREE TICKET
+          </button>
+          <button
+            type="button"
+            onClick={() => handleChange("type", "table")}
+            className={`py-4 px-6 border text-sm tracking-widest transition-all duration-300 ${
+              formData.type === "table"
+                ? "bg-black text-white border-black"
+                : "bg-transparent text-black border-black/10 hover:border-[#FF5401]"
+            }`}
+          >
+            PAID TABLE
+          </button>
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label className="text-black/60 text-xs tracking-wider">
@@ -77,7 +109,7 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
             value={formData.name}
             onChange={(e) => handleChange("name", e.target.value)}
             required
-            className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black"
+            className="bg-[#F5EDE4] border-black/10 rounded-none h-12 text-black"
             placeholder="Your name"
           />
         </div>
@@ -90,24 +122,24 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
             value={formData.email}
             onChange={(e) => handleChange("email", e.target.value)}
             required
-            className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black"
+            className="bg-[#F5EDE4] border-black/10 rounded-none h-12 text-black"
             placeholder="your@email.com"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-          <Label className="text-black/60 text-xs tracking-wider">
-            PHONE NUMBER *
-          </Label>
-          <Input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => handleChange("phone", e.target.value)}
-            required
-            className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black"
-            placeholder="+234..."
-          />
+        <Label className="text-black/60 text-xs tracking-wider">
+          PHONE NUMBER *
+        </Label>
+        <Input
+          type="tel"
+          value={formData.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          required
+          className="bg-[#F5EDE4] border-black/10 rounded-none h-12 text-black"
+          placeholder="+234..."
+        />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -118,7 +150,7 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
           <Input
             value={formData.instagram}
             onChange={(e) => handleChange("instagram", e.target.value)}
-            className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black"
+            className="bg-[#F5EDE4] border-black/10 rounded-none h-12 text-black"
             placeholder="@handle"
           />
         </div>
@@ -129,7 +161,7 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
           <Input
             value={formData.twitter}
             onChange={(e) => handleChange("twitter", e.target.value)}
-            className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black"
+            className="bg-[#F5EDE4] border-black/10 rounded-none h-12 text-black"
             placeholder="@handle"
           />
         </div>
@@ -144,10 +176,10 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
           onValueChange={(value) => handleChange("role", value)}
           required
         >
-          <SelectTrigger className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black">
+          <SelectTrigger className="bg-[#F5EDE4] border-black/10 rounded-none h-12 text-black">
             <SelectValue placeholder="Select your role" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white text-black">
             {roles.map((role) => (
               <SelectItem key={role.value} value={role.value}>
                 {role.label}
@@ -164,48 +196,59 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
         <Textarea
           value={formData.referral}
           onChange={(e) => handleChange("referral", e.target.value)}
-          className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none min-h-[100px] text-black resize-none"
+          className="bg-[#F5EDE4] border-black/10 rounded-none min-h-[100px] text-black resize-none"
           placeholder="Friend referral, Twitter, etc."
         />
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-black/60 text-xs tracking-wider">
-          NUMBER OF TABLES *
-        </Label>
-        <Select
-          value={String(formData.seats)}
-          onValueChange={(value) => handleChange("seats", parseInt(value))}
-        >
-          <SelectTrigger className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black w-24">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1">1 Table</SelectItem>
-            <SelectItem value="2">2 Tables</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-black/30 text-xs mt-1">
-          Limited availability. Maximum 7 tables per event.
-        </p>
-      </div>
+      {formData.type === "table" && (
+        <div className="space-y-2">
+          <Label className="text-black/60 text-xs tracking-wider">
+            NUMBER OF TABLES *
+          </Label>
+          <Select
+            value={String(formData.seats)}
+            onValueChange={(value) => handleChange("seats", parseInt(value))}
+          >
+            <SelectTrigger className="bg-[#F5EDE4] border-black/10 rounded-none h-12 text-black w-24">
+              <SelectValue placeholder="1" />
+            </SelectTrigger>
+            <SelectContent className="bg-white text-black">
+              <SelectItem value="1">1 Table</SelectItem>
+              <SelectItem value="2">2 Tables</SelectItem>
+              <SelectItem value="3">3 Tables</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-black/30 text-xs mt-1">
+            Limited availability. Maximum 7 tables per event.
+          </p>
+        </div>
+      )}
 
       <Button
         type="submit"
         disabled={
-          isSubmitting || !formData.name || !formData.email || !formData.phone || !formData.role
+          isSubmitting ||
+          !formData.name ||
+          !formData.email ||
+          !formData.phone ||
+          !formData.role
         }
         className="w-full bg-black hover:bg-[#FF5401] text-white rounded-none h-14 text-sm tracking-wider transition-colors duration-300"
       >
         {isSubmitting ? (
           <Loader2 className="w-5 h-5 animate-spin" />
-        ) : (
+        ) : formData.type === "table" ? (
           "RESERVE TABLE VIA WHATSAPP"
+        ) : (
+          "GET FREE TICKET VIA WHATSAPP"
         )}
       </Button>
 
       <p className="text-black/30 text-xs text-center">
-        You will be redirected to WhatsApp to complete your reservation payment.
+        {formData.type === "table"
+          ? "You will be redirected to WhatsApp to complete your reservation payment."
+          : "You will be redirected to WhatsApp to confirm your free entry."}
       </p>
     </form>
   );

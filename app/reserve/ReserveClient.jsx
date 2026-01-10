@@ -22,11 +22,12 @@ export default function ReserveClient({ event, eventId }) {
           name: data.name,
           email: data.email,
           phone: data.phone,
-          seats: data.seats,
+          seats: data.type === "ticket" ? 1 : data.seats,
           instagram: data.instagram,
           twitter: data.twitter,
           role: data.role,
           referral: data.referral,
+          type: data.type,
         }),
       });
 
@@ -42,11 +43,13 @@ export default function ReserveClient({ event, eventId }) {
       queryClient.invalidateQueries(["event", eventId]);
       
       const phone = "2348033448191"; 
-      const text = `Hi, I'd like to buy a table for ${event?.title || "OffGrid Event"}.
+      const isTable = variables.type === "table";
+      const text = `Hi, I'd like to register for ${event?.title || "OffGrid Event"}.
+Type: ${isTable ? "Paid Table" : "Free Ticket"}
 Name: ${variables.name}
 Email: ${variables.email}
 Phone: ${variables.phone}
-Tables: ${variables.seats}
+${isTable ? `Tables: ${variables.seats}` : ""}
 Role: ${variables.role}
 `;
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;

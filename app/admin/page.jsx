@@ -560,10 +560,10 @@ export default function AdminDashboard() {
                   >
                     <div>
                       <p className="font-medium">{res.name}</p>
-                      <p className="text-xs text-black/50">{res.role}</p>
+                      <p className="text-xs text-black/50">{res.role} • {res.type.toUpperCase()}</p>
                     </div>
                     <div className="text-sm">
-                      {res.seats} Table{res.seats > 1 ? "s" : ""}
+                      {res.type === "table" ? `${res.seats} Table${res.seats > 1 ? "s" : ""}` : "1 Ticket"}
                     </div>
                     <div>
                       <span
