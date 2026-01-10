@@ -1,0 +1,59 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Event title"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Event date"
+    },
+    "time": {
+      "type": "string",
+      "description": "Event time e.g. 8PM - 2AM"
+    },
+    "venue": {
+      "type": "string",
+      "description": "Venue name"
+    },
+    "location": {
+      "type": "string",
+      "description": "City/Address"
+    },
+    "total_seats": {
+      "type": "number",
+      "description": "Total available seats"
+    },
+    "seats_taken": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of seats already reserved"
+    },
+    "cover_image": {
+      "type": "string",
+      "description": "Event cover image URL"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "sold_out",
+        "past"
+      ],
+      "default": "upcoming"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief event description"
+    }
+  },
+  "required": [
+    "title",
+    "date",
+    "venue",
+    "total_seats"
+  ]
+}

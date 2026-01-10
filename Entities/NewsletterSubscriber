@@ -1,0 +1,19 @@
+{
+  "name": "NewsletterSubscriber",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Subscriber email"
+    },
+    "subscribed": {
+      "type": "boolean",
+      "default": true,
+      "description": "Subscription status"
+    }
+  },
+  "required": [
+    "email"
+  ]
+}
