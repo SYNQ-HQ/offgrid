@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { createPageUrl } from "@/lib/utils";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/";
@@ -47,8 +47,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5EDE4] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white border border-black/10 p-8 shadow-sm text-black">
+    <div className="w-full max-w-md bg-white border border-black/10 p-8 shadow-sm text-black">
         <Link
           href={createPageUrl("Home")}
           className="flex items-center gap-2 text-black/60 hover:text-[#FF5401] transition-colors duration-300 text-sm mb-8"
@@ -99,6 +98,15 @@ export default function LoginPage() {
           </Link>
         </div>
       </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen bg-[#F5EDE4] flex flex-col items-center justify-center p-6">
+      <Suspense fallback={<div className="text-black/50">Loading login...</div>}>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }
