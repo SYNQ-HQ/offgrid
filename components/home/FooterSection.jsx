@@ -75,8 +75,8 @@ export default function FooterSection() {
               </svg>
             </h3>
             <p className="text-[#F5EDE4]/40 text-sm font-light max-w-md leading-relaxed">
-              A private IRL culture event for tech builders to unplug, unwind,
-              and connect beyond screens.
+              A private IRL party for builders, creative, and everyone working
+              in tech to unplug unwind, and connect beyond screen.
             </p>
           </div>
 
