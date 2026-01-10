@@ -25,8 +25,8 @@ export default function MainLayout({ children }) {
 
   return (
     <>
-      {isHomePage && <AnnouncementBar />}
-      {showUserMenu && (
+      {/* {isHomePage && <AnnouncementBar />}*/}
+      {/* {showUserMenu && (
         <div className="bg-black border-b border-white/10 px-6 md:px-12 py-4">
           <div className="max-w-7xl mx-auto flex justify-end items-center gap-6">
             <div className="text-right">
@@ -57,9 +57,9 @@ export default function MainLayout({ children }) {
             </div>
           </div>
         </div>
-      )}
+      )}*/}
       {children}
-      {isHomePage && <ScrollPromotion />}
+      {/* {isHomePage && <ScrollPromotion />}*/}
       <ScrollToTop />
       <CookieNotice />
     </>

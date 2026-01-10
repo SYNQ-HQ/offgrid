@@ -11,14 +11,14 @@ export default function Home() {
   return (
     <main className="bg-black">
       <HeroSection />
-      <ManifestoSection />
-      <ExperienceSection />
-      <GallerySection />
-      <EventsSection />
-      <div id="store">
+      {/* <ManifestoSection />*/}
+      {/* <ExperienceSection />*/}
+      {/* <GallerySection />*/}
+      {/* <EventsSection />*/}
+      {/* <div id="store">
         <MerchSection />
-      </div>
-      <NewsletterSection />
+      </div>*/}
+      {/* <NewsletterSection />*/}
       <FooterSection />
     </main>
   );
