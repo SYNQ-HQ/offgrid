@@ -104,7 +104,7 @@ export default function Merch() {
             STORE
           </span>
           <h1 className="text-black text-4xl md:text-5xl font-extralight mb-4">
-            Off-Grid Merch
+            OffGrid Merch
           </h1>
           <p className="text-black/50 text-sm max-w-lg">
             Curated gear for the intentional builder. Every piece carries the
