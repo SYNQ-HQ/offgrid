@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#F5EDE4] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-white border border-black/10 p-8 shadow-sm">
+      <div className="w-full max-w-md bg-white border border-black/10 p-8 shadow-sm text-black">
         <Link
           href={createPageUrl("Home")}
           className="flex items-center gap-2 text-black/60 hover:text-[#FF5401] transition-colors duration-300 text-sm mb-8"
@@ -52,37 +52,37 @@ export default function RegisterPage() {
           Back Home
         </Link>
         
-        <h1 className="text-2xl font-light text-black mb-6">Create Account</h1>
+        <h1 className="text-2xl font-light mb-6">Create Account</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label>Name</Label>
+            <Label className="text-black/60">Name</Label>
             <Input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="bg-[#F5EDE4] border-black/10 rounded-none h-10"
+              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black placeholder:text-black/30"
             />
           </div>
           <div className="space-y-2">
-            <Label>Email</Label>
+            <Label className="text-black/60">Email</Label>
             <Input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
-              className="bg-[#F5EDE4] border-black/10 rounded-none h-10"
+              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black placeholder:text-black/30"
             />
           </div>
           <div className="space-y-2">
-            <Label>Password</Label>
+            <Label className="text-black/60">Password</Label>
             <Input
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
-              className="bg-[#F5EDE4] border-black/10 rounded-none h-10"
+              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black placeholder:text-black/30"
             />
           </div>
 

@@ -98,7 +98,7 @@ export default function MerchForm({
               value={formData.name}
               onChange={(e) => handleChange("name", e.target.value)}
               required
-              className="bg-[#F5EDE4] border-black/10 rounded-none h-10"
+              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black placeholder:text-black/30"
               placeholder="OffGrid Hoodie"
             />
           </div>
@@ -112,7 +112,7 @@ export default function MerchForm({
               value={formData.price}
               onChange={(e) => handleChange("price", e.target.value)}
               required
-              className="bg-[#F5EDE4] border-black/10 rounded-none h-10"
+              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black placeholder:text-black/30"
               placeholder="49.99"
             />
           </div>
@@ -125,7 +125,7 @@ export default function MerchForm({
           <Textarea
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}
-            className="bg-[#F5EDE4] border-black/10 rounded-none min-h-[80px] resize-none"
+            className="bg-[#F5EDE4] border-black/10 rounded-none min-h-[80px] resize-none text-black placeholder:text-black/30"
             placeholder="Brief product description"
           />
         </div>
@@ -139,7 +139,7 @@ export default function MerchForm({
               value={formData.image_url}
               onChange={(e) => handleChange("image_url", e.target.value)}
               required
-              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 flex-1"
+              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 flex-1 text-black placeholder:text-black/30"
               placeholder="https://... or upload"
             />
             <input
@@ -182,7 +182,7 @@ export default function MerchForm({
               value={formData.stock}
               onChange={(e) => handleChange("stock", e.target.value)}
               required
-              className="bg-[#F5EDE4] border-black/10 rounded-none h-10"
+              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black placeholder:text-black/30"
               placeholder="0"
             />
           </div>
@@ -194,7 +194,7 @@ export default function MerchForm({
               value={formData.category}
               onValueChange={(value) => handleChange("category", value)}
             >
-              <SelectTrigger className="bg-[#F5EDE4] border-black/10 rounded-none h-10">
+              <SelectTrigger className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

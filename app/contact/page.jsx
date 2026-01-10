@@ -23,23 +23,14 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Send confirmation to user
-      await apiClient.integrations.Core.SendEmail({
-        to: formData.email,
-        subject: `OffGrid: We received your message`,
-        body: `Hi ${formData.name},\n\nThank you for reaching out. We'll get back to you soon.\n\nOffGrid Team`,
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
-      // Get admin users to notify
-      const admins = await apiClient.entities.User.filter({ role: "admin" });
-
-      // Send to all admins
-      for (const admin of admins) {
-        await apiClient.integrations.Core.SendEmail({
-          to: admin.email,
-          subject: `New contact form submission: ${formData.subject}`,
-          body: `Name: ${formData.name}\nEmail: ${formData.email}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`,
-        });
+      if (!response.ok) {
+        throw new Error("Failed to send message");
       }
 
       setIsSuccess(true);
@@ -97,7 +88,7 @@ export default function Contact() {
               </p>
             </motion.div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 text-black">
               <div className="space-y-2">
                 <label className="text-black/60 text-xs tracking-wider">
                   NAME *
@@ -108,7 +99,7 @@ export default function Contact() {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   required
-                  className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12"
+                  className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black placeholder:text-black/30"
                   placeholder="Your name"
                 />
               </div>
@@ -124,7 +115,7 @@ export default function Contact() {
                     setFormData({ ...formData, email: e.target.value })
                   }
                   required
-                  className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12"
+                  className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black placeholder:text-black/30"
                   placeholder="your@email.com"
                 />
               </div>
@@ -139,7 +130,7 @@ export default function Contact() {
                     setFormData({ ...formData, subject: e.target.value })
                   }
                   required
-                  className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12"
+                  className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black placeholder:text-black/30"
                   placeholder="What is this about?"
                 />
               </div>
@@ -154,7 +145,7 @@ export default function Contact() {
                     setFormData({ ...formData, message: e.target.value })
                   }
                   required
-                  className="w-full bg-transparent border border-black/10 focus:border-[#FF5401] p-4 text-black placeholder-black/30 rounded-none h-32"
+                  className="w-full bg-transparent border border-black/10 focus:border-[#FF5401] p-4 text-black placeholder:text-black/30 rounded-none h-32"
                   placeholder="Your message..."
                 />
               </div>

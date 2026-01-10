@@ -28,24 +28,27 @@ function ReserveContent() {
 
   const createReservation = useMutation({
     mutationFn: async (data) => {
-      const reservation = await apiClient.entities.Reservation.create({
-        ...data,
-        event_id: eventId,
-        status: "pending",
+      const response = await fetch("/api/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId,
+          name: data.name,
+          email: data.email,
+          seats: data.seats,
+          instagram: data.instagram,
+          twitter: data.twitter,
+          role: data.role,
+          referral: data.referral,
+        }),
       });
-      // Update seats taken
-      if (event) {
-        await apiClient.entities.Event.update(eventId, {
-          seats_taken: (event.seats_taken || 0) + data.seats,
-        });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create reservation");
       }
-      // Send confirmation email
-      await apiClient.integrations.Core.SendEmail({
-        to: data.email,
-        subject: "Reservation Submitted - OffGrid",
-        body: `Hi ${data.name},\n\nYour reservation for ${event.title} has been submitted for review.\n\nEvent: ${event.title}\nDate: ${format(new Date(event.date), "MMMM d, yyyy")}\nSeats: ${data.seats}\n\nWe'll confirm your spot soon.\n\nOffGrid Team`,
-      });
-      return reservation;
+
+      return response.json();
     },
     onSuccess: () => {
       setIsSuccess(true);

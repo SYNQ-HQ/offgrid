@@ -35,7 +35,9 @@ export async function POST(request) {
       },
     });
 
-    return NextResponse.json(user);
+    const { password: _, ...userWithoutPassword } = user;
+
+    return NextResponse.json(userWithoutPassword);
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(

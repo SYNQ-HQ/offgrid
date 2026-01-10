@@ -5,8 +5,12 @@ import { ArrowDown } from "lucide-react";
 import Link from "next/link";
 import { createPageUrl } from "@/lib/utils";
 import MobileNav from "./MobileNav";
+import { useSession } from "next-auth/react";
 
 export default function HeroSection() {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   return (
     <section className="min-h-screen bg-black flex flex-col justify-between relative overflow-hidden">
       {/* Subtle grain texture overlay */}
@@ -27,7 +31,7 @@ export default function HeroSection() {
         <div className="text-[#F5EDE4] font-light tracking-[0.3em] text-sm">
           OFFGRID
         </div>
-        <div className="hidden md:flex gap-12 text-[#F5EDE4]/60 text-xs tracking-[0.2em]">
+        <div className="hidden md:flex items-center gap-12 text-[#F5EDE4]/60 text-xs tracking-[0.2em]">
           <a
             href="#manifesto"
             className="hover:text-[#FF5401] transition-colors duration-300"
@@ -64,6 +68,21 @@ export default function HeroSection() {
           >
             CONTACT
           </Link>
+          {user ? (
+            <Link
+              href={createPageUrl("Profile")}
+              className="text-[#FF5401] hover:text-[#F5EDE4] transition-colors duration-300 border border-[#FF5401] px-4 py-2"
+            >
+              PROFILE
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="hover:text-[#FF5401] transition-colors duration-300"
+            >
+              LOGIN
+            </Link>
+          )}
         </div>
         <MobileNav />
       </motion.nav>
