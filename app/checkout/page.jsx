@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createPageUrl } from "@/lib/utils";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -70,7 +70,7 @@ function CheckoutForm({ cartData, onSuccess }) {
 
     if (paymentIntent.status === "succeeded") {
       // Create order in database
-      const order = await base44.entities.Order.create({
+      const order = await apiClient.entities.Order.create({
         stripe_payment_id: paymentIntent.id,
         customer_email: formData.email,
         customer_name: formData.name,
@@ -81,7 +81,7 @@ function CheckoutForm({ cartData, onSuccess }) {
       });
 
       if (order) {
-        await base44.integrations.Core.SendEmail({
+        await apiClient.integrations.Core.SendEmail({
           to: formData.email,
           subject: "Order Confirmed - OffGrid Store",
           body: `Hi ${formData.name},\n\nThank you for your order! Your purchase has been confirmed.\n\nOrder ID: ${order.id}\nTotal: $${order.total_amount.toFixed(2)}\n\nOffGrid Team`,

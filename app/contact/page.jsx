@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import Link from "next/link";
 import { createPageUrl } from "@/lib/utils";
 import { ArrowLeft, Loader2, Check } from "lucide-react";
@@ -24,18 +24,18 @@ export default function Contact() {
 
     try {
       // Send confirmation to user
-      await base44.integrations.Core.SendEmail({
+      await apiClient.integrations.Core.SendEmail({
         to: formData.email,
         subject: `OffGrid: We received your message`,
         body: `Hi ${formData.name},\n\nThank you for reaching out. We'll get back to you soon.\n\nOffGrid Team`,
       });
 
       // Get admin users to notify
-      const admins = await base44.entities.User.filter({ role: "admin" });
+      const admins = await apiClient.entities.User.filter({ role: "admin" });
 
       // Send to all admins
       for (const admin of admins) {
-        await base44.integrations.Core.SendEmail({
+        await apiClient.integrations.Core.SendEmail({
           to: admin.email,
           subject: `New contact form submission: ${formData.subject}`,
           body: `Name: ${formData.name}\nEmail: ${formData.email}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`,

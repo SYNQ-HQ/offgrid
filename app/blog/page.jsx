@@ -2,7 +2,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import Link from "next/link";
 import { createPageUrl } from "@/lib/utils";
 import { ArrowLeft, Calendar, User } from "lucide-react";
@@ -12,7 +12,7 @@ export default function Blog() {
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["blog-posts"],
     queryFn: () =>
-      base44.entities.BlogPost.filter(
+      apiClient.entities.BlogPost.filter(
         { status: "published" },
         "-published_date",
         50,

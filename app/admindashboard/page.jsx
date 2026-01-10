@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createPageUrl } from "@/lib/utils";
@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
   React.useEffect(() => {
     const getUser = async () => {
-      const currentUser = await base44.auth.me();
+      const currentUser = await apiClient.auth.me();
       if (currentUser?.role !== "admin") {
         router.push(createPageUrl("Home"));
       }
@@ -37,19 +37,19 @@ export default function AdminDashboard() {
 
   const { data: orders = [] } = useQuery({
     queryKey: ["all-orders"],
-    queryFn: () => base44.entities.Order.list("-createdAt", 100),
+    queryFn: () => apiClient.entities.Order.list("-createdAt", 100),
     initialData: [],
   });
 
   const { data: reservations = [] } = useQuery({
     queryKey: ["all-reservations"],
-    queryFn: () => base44.entities.Reservation.list("-createdAt", 100),
+    queryFn: () => apiClient.entities.Reservation.list("-createdAt", 100),
     initialData: [],
   });
 
   const updateReservationMutation = useMutation({
     mutationFn: ({ id, status }) =>
-      base44.entities.Reservation.update(id, { status }),
+      apiClient.entities.Reservation.update(id, { status }),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ["all-reservations"] }),
   });

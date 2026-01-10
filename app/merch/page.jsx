@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import Link from "next/link";
 import { createPageUrl } from "@/lib/utils";
 import { ShoppingBag, ArrowLeft, Search } from "lucide-react";
@@ -18,7 +18,7 @@ export default function Merch() {
 
   const { data: items = [] } = useQuery({
     queryKey: ["merch"],
-    queryFn: () => base44.entities.Merch.list("-createdAt", 50),
+    queryFn: () => apiClient.entities.Merch.list("-createdAt", 50),
     initialData: [],
   });
 

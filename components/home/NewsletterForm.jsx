@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check } from "lucide-react";
@@ -19,16 +19,16 @@ export default function NewsletterForm() {
 
     try {
       // Check if already subscribed
-      const existing = await base44.entities.NewsletterSubscriber.filter({
+      const existing = await apiClient.entities.NewsletterSubscriber.filter({
         email,
       });
 
       if (existing.length === 0) {
-        await base44.entities.NewsletterSubscriber.create({ email });
+        await apiClient.entities.NewsletterSubscriber.create({ email });
       }
 
       // Send welcome email
-      await base44.integrations.Core.SendEmail({
+      await apiClient.integrations.Core.SendEmail({
         to: email,
         subject: "Welcome to OffGrid Newsletter",
         body: `Welcome to the OffGrid community!\n\nYou're now subscribed to our newsletter. We'll share updates, stories, and exclusive content about OffGrid events and culture.\n\nOffGrid Team`,

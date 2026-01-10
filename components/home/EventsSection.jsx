@@ -2,7 +2,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import Link from "next/link";
 import { createPageUrl } from "@/lib/utils";
 import { format } from "date-fns";
@@ -12,7 +12,7 @@ export default function EventsSection() {
   const { data: events = [] } = useQuery({
     queryKey: ["events"],
     queryFn: () =>
-      base44.entities.Event.filter({ status: "upcoming" }, "date", 3),
+      apiClient.entities.Event.filter({ status: "upcoming" }, "date", 3),
     initialData: [],
   });
 

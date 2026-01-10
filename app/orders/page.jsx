@@ -2,7 +2,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import Link from "next/link";
 import { createPageUrl } from "@/lib/utils";
 import { ArrowLeft, Package, Calendar } from "lucide-react";
@@ -13,7 +13,7 @@ export default function Orders() {
 
   React.useEffect(() => {
     const getUser = async () => {
-      const currentUser = await base44.auth.me();
+      const currentUser = await apiClient.auth.me();
       setUser(currentUser);
     };
     getUser();
@@ -23,7 +23,7 @@ export default function Orders() {
     queryKey: ["orders", user?.email],
     queryFn: () =>
       user
-        ? base44.entities.Order.filter(
+        ? apiClient.entities.Order.filter(
             { customer_email: user.email },
             "-createdAt",
             100,

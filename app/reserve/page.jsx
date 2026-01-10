@@ -2,7 +2,7 @@
 import React, { useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createPageUrl } from "@/lib/utils";
@@ -20,7 +20,7 @@ function ReserveContent() {
     queryKey: ["event", eventId],
     queryFn: async () => {
       if (!eventId) return null;
-      const events = await base44.entities.Event.filter({ id: eventId });
+      const events = await apiClient.entities.Event.filter({ id: eventId });
       return events[0] || null;
     },
     enabled: !!eventId,
@@ -28,19 +28,19 @@ function ReserveContent() {
 
   const createReservation = useMutation({
     mutationFn: async (data) => {
-      const reservation = await base44.entities.Reservation.create({
+      const reservation = await apiClient.entities.Reservation.create({
         ...data,
         event_id: eventId,
         status: "pending",
       });
       // Update seats taken
       if (event) {
-        await base44.entities.Event.update(eventId, {
+        await apiClient.entities.Event.update(eventId, {
           seats_taken: (event.seats_taken || 0) + data.seats,
         });
       }
       // Send confirmation email
-      await base44.integrations.Core.SendEmail({
+      await apiClient.integrations.Core.SendEmail({
         to: data.email,
         subject: "Reservation Submitted - OffGrid",
         body: `Hi ${data.name},\n\nYour reservation for ${event.title} has been submitted for review.\n\nEvent: ${event.title}\nDate: ${format(new Date(event.date), "MMMM d, yyyy")}\nSeats: ${data.seats}\n\nWe'll confirm your spot soon.\n\nOffGrid Team`,

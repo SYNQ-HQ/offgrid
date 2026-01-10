@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MerchForm from "@/components/admin/MerchForm";
@@ -14,12 +14,12 @@ export default function AdminMerch() {
 
   const { data: items = [] } = useQuery({
     queryKey: ["admin-merch"],
-    queryFn: () => base44.entities.Merch.list("-createdAt", 100),
+    queryFn: () => apiClient.entities.Merch.list("-createdAt", 100),
     initialData: [],
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Merch.create(data),
+    mutationFn: (data) => apiClient.entities.Merch.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-merch", "merch"] });
       setShowForm(false);
@@ -27,7 +27,7 @@ export default function AdminMerch() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Merch.update(id, data),
+    mutationFn: ({ id, data }) => apiClient.entities.Merch.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-merch", "merch"] });
       setEditingItem(null);
@@ -36,7 +36,7 @@ export default function AdminMerch() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Merch.delete(id),
+    mutationFn: (id) => apiClient.entities.Merch.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-merch", "merch"] });
     },

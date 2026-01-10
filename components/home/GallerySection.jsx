@@ -2,12 +2,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+import { apiClient } from "@/lib/api";
 
 export default function GallerySection() {
   const { data: images = [] } = useQuery({
     queryKey: ["gallery"],
-    queryFn: () => base44.entities.GalleryImage.list("order", 12),
+    queryFn: () => apiClient.entities.GalleryImage.list("order", 12),
     initialData: [],
   });
 
