@@ -77,7 +77,7 @@ function VerifyContent() {
               Thank you for your purchase. We've sent a confirmation email.
             </p>
             <Link
-              href={createPageUrl("UserProfile")}
+              href={createPageUrl("Profile")}
               className="inline-block bg-black text-white px-8 py-3 text-sm hover:bg-[#FF5401] transition-colors"
             >
               VIEW ORDER

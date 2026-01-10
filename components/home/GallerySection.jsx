@@ -86,7 +86,7 @@ export default function GallerySection() {
               }`}
             >
               <img
-                src={image.image_url}
+                src={image.url || image.image_url}
                 alt={image.caption || "OffGrid moment"}
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
               />

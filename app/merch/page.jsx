@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
@@ -15,6 +15,27 @@ export default function Merch() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load cart from local storage
+  useEffect(() => {
+    const savedCart = localStorage.getItem("offgrid_cart");
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error("Failed to parse cart", e);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save cart to local storage
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem("offgrid_cart", JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   const { data: items = [] } = useQuery({
     queryKey: ["merch"],

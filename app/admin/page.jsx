@@ -26,8 +26,10 @@ import { format } from "date-fns";
 import MerchForm from "@/components/admin/MerchForm";
 import BlogForm from "@/components/admin/BlogForm";
 import EventForm from "@/components/admin/EventForm";
+import GalleryForm from "@/components/admin/GalleryForm";
 import { useToast } from "@/components/ui/toast";
 import { ConfirmationModal } from "@/components/ui/modal";
+import { Image as ImageIcon, Mail } from "lucide-react";
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession({ required: true });
@@ -35,6 +37,7 @@ export default function AdminDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: null, id: null });
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -88,7 +91,40 @@ export default function AdminDashboard() {
     initialData: [],
   });
 
+  const { data: galleryImages = [] } = useQuery({
+    queryKey: ["admin-gallery"],
+    queryFn: () => apiClient.entities.GalleryImage.list("order", 100),
+    enabled: isEnabled && activeTab === "gallery",
+    initialData: [],
+  });
+
+  const { data: subscribers = [] } = useQuery({
+    queryKey: ["admin-subscribers"],
+    queryFn: () => apiClient.entities.NewsletterSubscriber.list("-createdAt", 200),
+    enabled: isEnabled && activeTab === "subscribers",
+    initialData: [],
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ["admin-users"],
+    queryFn: () => apiClient.entities.User.list("-createdAt", 100),
+    enabled: isEnabled && activeTab === "users",
+    initialData: [],
+  });
+
   // Mutations
+  const updateOrderMutation = useMutation({
+    mutationFn: ({ id, status }) =>
+      apiClient.entities.Order.update(id, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-orders"] });
+      toast({ title: "Success", description: "Order status updated", variant: "success" });
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "error" });
+    }
+  });
+
   const updateReservationMutation = useMutation({
     mutationFn: ({ id, status }) =>
       apiClient.entities.Reservation.update(id, { status }),
@@ -192,6 +228,47 @@ export default function AdminDashboard() {
     }),
   };
 
+  const galleryMutations = {
+    create: useMutation({
+      mutationFn: (data) => apiClient.entities.GalleryImage.create(data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-gallery"] });
+        setShowForm(false);
+        toast({ title: "Success", description: "Gallery image added", variant: "success" });
+      },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
+    }),
+    update: useMutation({
+      mutationFn: ({ id, data }) => apiClient.entities.GalleryImage.update(id, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-gallery"] });
+        setEditingItem(null);
+        setShowForm(false);
+        toast({ title: "Success", description: "Gallery image updated", variant: "success" });
+      },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
+    }),
+    delete: useMutation({
+      mutationFn: (id) => apiClient.entities.GalleryImage.delete(id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-gallery"] });
+        toast({ title: "Success", description: "Gallery image deleted", variant: "success" });
+      },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
+    }),
+  };
+
+  const subscriberMutations = {
+    delete: useMutation({
+      mutationFn: (id) => apiClient.entities.NewsletterSubscriber.delete(id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-subscribers"] });
+        toast({ title: "Success", description: "Subscriber removed", variant: "success" });
+      },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
+    }),
+  };
+
   const handleFormSubmit = (data) => {
     if (activeTab === "merch") {
       if (editingItem)
@@ -205,6 +282,10 @@ export default function AdminDashboard() {
       if (editingItem)
         eventMutations.update.mutate({ id: editingItem.id, data });
       else eventMutations.create.mutate(data);
+    } else if (activeTab === "gallery") {
+      if (editingItem)
+        galleryMutations.update.mutate({ id: editingItem.id, data });
+      else galleryMutations.create.mutate(data);
     }
   };
 
@@ -222,6 +303,8 @@ export default function AdminDashboard() {
     if (type === "merch") merchMutations.delete.mutate(id);
     else if (type === "blog") blogMutations.delete.mutate(id);
     else if (type === "events") eventMutations.delete.mutate(id);
+    else if (type === "gallery") galleryMutations.delete.mutate(id);
+    else if (type === "subscribers") subscriberMutations.delete.mutate(id);
     setConfirmModal({ isOpen: false, type: null, id: null });
   };
 
@@ -251,11 +334,14 @@ export default function AdminDashboard() {
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Users },
+    { id: "users", label: "Users", icon: Users },
     { id: "orders", label: "Orders", icon: Package },
     { id: "reservations", label: "Reservations", icon: Ticket },
     { id: "events", label: "Events", icon: Calendar },
     { id: "merch", label: "Merchandise", icon: ShoppingBag },
     { id: "blog", label: "Blog Posts", icon: FileText },
+    { id: "gallery", label: "Gallery", icon: ImageIcon },
+    { id: "subscribers", label: "Subscribers", icon: Mail },
   ];
 
   return (
@@ -344,6 +430,41 @@ export default function AdminDashboard() {
           </motion.div>
         )}
 
+        {/* Users Tab */}
+        {activeTab === "users" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <h2 className="text-3xl font-extralight mb-8">Users</h2>
+            <div className="bg-white border border-black/10 overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-black/5">
+                    <th className="p-4 text-xs font-medium tracking-wider text-black/50">NAME</th>
+                    <th className="p-4 text-xs font-medium tracking-wider text-black/50">EMAIL</th>
+                    <th className="p-4 text-xs font-medium tracking-wider text-black/50">ROLE</th>
+                    <th className="p-4 text-xs font-medium tracking-wider text-black/50">JOINED</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-black/5">
+                  {users.map((user) => (
+                    <tr key={user.id} className="hover:bg-black/2 transition-colors">
+                      <td className="p-4 text-sm font-light">{user.name || "Anonymous"}</td>
+                      <td className="p-4 text-sm font-light">{user.email}</td>
+                      <td className="p-4">
+                        <span className={`text-[10px] px-2 py-0.5 border ${user.role === "admin" ? "border-[#FF5401] text-[#FF5401]" : "border-black/20 text-black/40"}`}>
+                          {user.role.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="p-4 text-sm text-black/50 font-light">
+                        {format(new Date(user.createdAt), "MMM d, yyyy")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        )}
+
         {/* Orders Tab */}
         {activeTab === "orders" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -353,29 +474,70 @@ export default function AdminDashboard() {
                 <p className="text-black/50">No orders found.</p>
               ) : (
                 orders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="bg-white border border-black/10 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">
-                        {order.customer_email}
-                      </p>
-                      <p className="text-xs text-black/50">
-                        {format(new Date(order.createdAt), "MMM d, yyyy")} •{" "}
-                        {order.items.length} items
-                      </p>
+                  <div key={order.id} className="bg-white border border-black/10">
+                    <div
+                      className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 cursor-pointer hover:bg-black/[0.01]"
+                      onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                    >
+                      <div>
+                        <p className="text-sm font-medium">
+                          {order.customer_email}
+                        </p>
+                        <p className="text-xs text-black/50">
+                          {format(new Date(order.createdAt), "MMM d, yyyy")} •{" "}
+                          {order.items.length} items
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6" onClick={(e) => e.stopPropagation()}>
+                        <p className="font-light">
+                          ₦{order.total_amount.toFixed(2)}
+                        </p>
+                        <select
+                          value={order.status}
+                          onChange={(e) => 
+                            updateOrderMutation.mutate({ id: order.id, status: e.target.value })
+                          }
+                          className={`px-3 py-1 text-xs border-none cursor-pointer focus:ring-0 ${
+                            order.status === "completed" 
+                              ? "bg-green-100 text-green-700" 
+                              : order.status === "failed" 
+                                ? "bg-red-100 text-red-700"
+                                : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="completed">Completed</option>
+                          <option value="failed">Failed</option>
+                        </select>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <p className="font-light">
-                        ₦{order.total_amount.toFixed(2)}
-                      </p>
-                      <span
-                        className={`px-3 py-1 text-xs ${order.status === "completed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
+                    
+                    <AnimatePresence>
+                      {expandedOrder === order.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden border-t border-black/5 bg-black/[0.01]"
+                        >
+                          <div className="p-6 space-y-3">
+                            <p className="text-[10px] tracking-wider text-black/40 mb-2 uppercase">Order Details</p>
+                            {order.items.map((item, idx) => (
+                              <div key={idx} className="flex justify-between text-sm font-light">
+                                <span>{item.name} <span className="text-black/30">x{item.quantity}</span></span>
+                                <span>₦{(item.price * item.quantity).toFixed(2)}</span>
+                              </div>
+                            ))}
+                            {order.shipping_address && (
+                              <div className="pt-3 mt-3 border-t border-black/5">
+                                <p className="text-[10px] tracking-wider text-black/40 mb-1 uppercase">Shipping Address</p>
+                                <p className="text-sm font-light text-black/60">{order.shipping_address}</p>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 ))
               )}
@@ -528,6 +690,129 @@ export default function AdminDashboard() {
                    </div>
                 </div>
               ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Gallery Tab */}
+        {activeTab === "gallery" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-extralight">Gallery</h2>
+              <Button
+                onClick={() => setShowForm(!showForm)}
+                className="bg-black hover:bg-[#FF5401] rounded-none"
+              >
+                <Plus className="w-4 h-4 mr-2" /> Add Image
+              </Button>
+            </div>
+
+            <AnimatePresence>
+              {showForm && (
+                <div className="mb-8">
+                  <GalleryForm
+                    onSubmit={handleFormSubmit}
+                    isSubmitting={
+                      galleryMutations.create.isPending ||
+                      galleryMutations.update.isPending
+                    }
+                    onCancel={handleCancel}
+                    initialData={editingItem}
+                  />
+                </div>
+              )}
+            </AnimatePresence>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {galleryImages.map((image) => (
+                <div
+                  key={image.id}
+                  className="bg-white border border-black/10 p-2 group hover:border-[#FF5401] transition-colors"
+                >
+                  <div className="relative aspect-square mb-2 bg-black/5 overflow-hidden">
+                    {image.url && (
+                      <img
+                        src={image.url}
+                        alt={image.caption || "Gallery image"}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleEdit(image)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(image.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="px-1">
+                    <p className="text-xs text-black/60 truncate">
+                      {image.caption || "No caption"}
+                    </p>
+                    <p className="text-[10px] text-black/30 mt-1">
+                      Order: {image.order}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Subscribers Tab */}
+        {activeTab === "subscribers" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <h2 className="text-3xl font-extralight mb-8">Subscribers</h2>
+            <div className="bg-white border border-black/10 overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-black/5">
+                    <th className="p-4 text-xs font-medium tracking-wider text-black/50">EMAIL</th>
+                    <th className="p-4 text-xs font-medium tracking-wider text-black/50">JOINED</th>
+                    <th className="p-4 text-xs font-medium tracking-wider text-black/50">STATUS</th>
+                    <th className="p-4 text-xs font-medium tracking-wider text-black/50">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-black/5">
+                  {subscribers.map((sub) => (
+                    <tr key={sub.id} className="hover:bg-black/2 transition-colors">
+                      <td className="p-4 text-sm font-light">{sub.email}</td>
+                      <td className="p-4 text-sm text-black/50 font-light">
+                        {format(new Date(sub.createdAt), "MMM d, yyyy")}
+                      </td>
+                      <td className="p-4">
+                        <span className={`text-[10px] px-2 py-0.5 border ${sub.subscribed ? "border-green-500 text-green-600" : "border-red-500 text-red-600"}`}>
+                          {sub.subscribed ? "SUBSCRIBED" : "UNSUBSCRIBED"}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                          onClick={() => handleDelete(sub.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {subscribers.length === 0 && (
+                <div className="p-12 text-center text-black/40 font-light">
+                  No subscribers yet.
+                </div>
+              )}
             </div>
           </motion.div>
         )}
