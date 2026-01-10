@@ -5,211 +5,63 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createPageUrl } from "@/lib/utils";
-import { apiClient } from "@/lib/api";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, AlertCircle, Loader2, Check } from "lucide-react";
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_KEY || "pk_test_placeholder",
-);
-
-function CheckoutForm({ cartData, onSuccess }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState("");
-  const [formData, setFormData] = useState({
-    email: "",
-    name: "",
-    address: "",
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-
-    setIsProcessing(true);
-    setError("");
-
-    const { error: submitError } = await elements.submit();
-    if (submitError) {
-      setError(submitError.message);
-      setIsProcessing(false);
-      return;
-    }
-
-    // Confirm the payment
-    const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/checkout/success`,
-        payment_method_data: {
-          billing_details: {
-            name: formData.name,
-            email: formData.email,
-          },
-        },
-      },
-      redirect: "if_required",
-    });
-
-    if (confirmError) {
-      setError(confirmError.message);
-      setIsProcessing(false);
-      return;
-    }
-
-    if (paymentIntent.status === "succeeded") {
-      // Create order in database
-      const order = await apiClient.entities.Order.create({
-        stripe_payment_id: paymentIntent.id,
-        customer_email: formData.email,
-        customer_name: formData.name,
-        items: cartData,
-        total_amount: paymentIntent.amount / 100,
-        shipping_address: formData.address,
-        status: "completed",
-      });
-
-      if (order) {
-        await apiClient.integrations.Core.SendEmail({
-          to: formData.email,
-          subject: "Order Confirmed - OffGrid Store",
-          body: `Hi ${formData.name},\n\nThank you for your order! Your purchase has been confirmed.\n\nOrder ID: ${order.id}\nTotal: $${order.total_amount.toFixed(2)}\n\nOffGrid Team`,
-        });
-        onSuccess();
-      } else {
-        setError(
-          "Payment succeeded but failed to save order. Please contact support.",
-        );
-      }
-    }
-
-    setIsProcessing(false);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label className="text-black/60 text-xs tracking-wider">EMAIL *</Label>
-        <Input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-          className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12"
-          placeholder="your@email.com"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-black/60 text-xs tracking-wider">NAME *</Label>
-        <Input
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
-          className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12"
-          placeholder="Full name"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-black/60 text-xs tracking-wider">
-          SHIPPING ADDRESS
-        </Label>
-        <Input
-          value={formData.address}
-          onChange={(e) =>
-            setFormData({ ...formData, address: e.target.value })
-          }
-          className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12"
-          placeholder="Address (optional)"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-black/60 text-xs tracking-wider">
-          PAYMENT *
-        </Label>
-        <div className="p-4 border border-black/10 rounded-none">
-          <PaymentElement />
-        </div>
-      </div>
-
-      {error && (
-        <div className="flex gap-3 p-4 bg-red-50 border border-red-200 rounded-none">
-          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
-
-      <Button
-        type="submit"
-        disabled={isProcessing || !stripe}
-        className="w-full bg-black hover:bg-[#FF5401] text-white rounded-none h-12 text-sm tracking-wider"
-      >
-        {isProcessing ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          "Complete Purchase"
-        )}
-      </Button>
-    </form>
-  );
-}
-
-function SuccessMessage() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="text-center py-16"
-    >
-      <div className="w-16 h-16 bg-[#FF5401] rounded-full flex items-center justify-center mx-auto mb-6">
-        <Check className="w-8 h-8 text-white" />
-      </div>
-      <h2 className="text-2xl font-light text-black mb-3">Order confirmed.</h2>
-      <p className="text-black/50 text-sm max-w-md mx-auto mb-8">
-        Thanks for your purchase. Check your email for order details.
-      </p>
-      <Link
-        href={createPageUrl("Home")}
-        className="inline-flex items-center gap-2 px-8 py-4 bg-black hover:bg-[#FF5401] text-white transition-colors duration-300"
-      >
-        Back Home
-      </Link>
-    </motion.div>
-  );
-}
+import { ArrowLeft, AlertCircle, Loader2 } from "lucide-react";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const cartDataStr = searchParams.get("cart");
   const cartData = cartDataStr ? JSON.parse(cartDataStr) : [];
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [clientSecret, setClientSecret] = useState("");
+  
+  const [formData, setFormData] = useState({
+    email: "",
+    name: "",
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (cartData.length > 0) {
-      fetch("/api/create-payment-intent", {
+  const total = cartData.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
+  const handlePaystackPayment = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/paystack/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cartData }),
-      })
-        .then((res) => res.json())
-        .then((data) => setClientSecret(data.clientSecret))
-        .catch((err) => console.error("Failed to create payment intent", err));
+        body: JSON.stringify({
+          email: formData.email,
+          amount: total,
+          items: cartData,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Payment initialization failed");
+      }
+
+      // Redirect user to Paystack checkout page
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url;
+      } else {
+        throw new Error("No authorization URL returned");
+      }
+
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Something went wrong.");
+      setIsProcessing(false);
     }
-  }, []);
+  };
 
   if (!cartData || cartData.length === 0) {
     return (
@@ -230,11 +82,6 @@ function CheckoutContent() {
     );
   }
 
-  const total = cartData.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-
   return (
     <div className="min-h-screen bg-[#F5EDE4]">
       {/* Header */}
@@ -248,10 +95,7 @@ function CheckoutContent() {
         </Link>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-6 md:px-12 py-12 md:py-24">
-        {isSuccess ? (
-          <SuccessMessage />
-        ) : (
+      <div className="max-w-4xl mx-auto px-6 md:px-12 py-12 md:py-24">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -260,28 +104,61 @@ function CheckoutContent() {
             <h1 className="text-black text-3xl md:text-4xl font-extralight mb-2">
               Checkout
             </h1>
-            <p className="text-black/50 text-sm mb-12">Complete your order</p>
+            <p className="text-black/50 text-sm mb-12">Complete your order with Paystack</p>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {/* Order Summary */}
-              <div className="md:col-span-2">
-                {clientSecret ? (
-                  <Elements stripe={stripePromise} options={{ clientSecret }}>
-                    <CheckoutForm
-                      cartData={cartData}
-                      onSuccess={() => setIsSuccess(true)}
-                    />
-                  </Elements>
-                ) : (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-black/20" />
+            <div className="grid md:grid-cols-2 gap-12">
+              {/* Form */}
+              <form onSubmit={handlePaystackPayment} className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-black/60 text-xs tracking-wider">EMAIL *</Label>
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black placeholder:text-black/30"
+                    placeholder="your@email.com"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-black/60 text-xs tracking-wider">NAME *</Label>
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black placeholder:text-black/30"
+                    placeholder="Full name"
+                  />
+                </div>
+
+                <div className="p-4 bg-white border border-black/10 text-sm text-black/60">
+                    You will be redirected to Paystack to complete your payment securely via Card or Bank Transfer.
+                </div>
+
+                {error && (
+                  <div className="flex gap-3 p-4 bg-red-50 border border-red-200 rounded-none">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-600">{error}</p>
                   </div>
                 )}
-              </div>
+
+                <Button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full bg-black hover:bg-[#FF5401] text-white rounded-none h-14 text-sm tracking-wider transition-colors duration-300"
+                >
+                  {isProcessing ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    `Pay $${total.toFixed(2)}`
+                  )}
+                </Button>
+              </form>
 
               {/* Order Summary Sidebar */}
               <div>
-                <div className="bg-white border border-black/10 p-6 sticky top-6">
+                <div className="bg-white border border-black/10 p-8 sticky top-6">
                   <h3 className="text-black font-light text-lg mb-6">
                     Order Summary
                   </h3>
@@ -292,7 +169,7 @@ function CheckoutContent() {
                         className="flex justify-between text-sm"
                       >
                         <span className="text-black/60">
-                          {item.name} x{item.quantity}
+                          {item.name} <span className="text-black/30">x{item.quantity}</span>
                         </span>
                         <span className="text-black font-medium">
                           ${(item.price * item.quantity).toFixed(2)}
@@ -300,9 +177,9 @@ function CheckoutContent() {
                       </div>
                     ))}
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-black/60">Total</span>
-                    <span className="text-[#FF5401] text-xl font-light">
+                  <div className="flex justify-between items-center text-lg">
+                    <span className="text-black font-light">Total</span>
+                    <span className="text-[#FF5401] font-normal">
                       ${total.toFixed(2)}
                     </span>
                   </div>
@@ -310,7 +187,6 @@ function CheckoutContent() {
               </div>
             </div>
           </motion.div>
-        )}
       </div>
     </div>
   );

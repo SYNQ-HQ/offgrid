@@ -6,7 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 // Define Access Control Rules
 const PUBLIC_READ_MODELS = ["Event", "Merch", "BlogPost", "GalleryImage", "NewsletterSubscriber"]; // Public can read these
 const PUBLIC_CREATE_MODELS = ["NewsletterSubscriber", "Order", "Reservation"]; // Public can create these
-const ADMIN_ONLY_MODELS = ["User", "Account", "Session", "VerificationToken"]; // Only admin can touch these (unless strict exception)
+const ADMIN_ONLY_MODELS = ["User", "Account", "Session", "VerificationToken"]; // Only admin can touch these
 
 export async function GET(request, { params }) {
   const { model } = await params;
@@ -15,11 +15,6 @@ export async function GET(request, { params }) {
   const limit = searchParams.get("limit");
   const queryStr = searchParams.get("query");
   
-  // 1. Validate Model Name to prevent arbitrary table access
-  const validModels = Object.keys(prisma).filter(key => !key.startsWith('$') && !key.startsWith('_'));
-  // Simple check: capitalization matter. Prisma client keys are usually lowercase for properties (user, event)
-  // But our URL params are PascalCase usually (User, Event). 
-  // The existing code does: model.charAt(0).toLowerCase() + model.slice(1);
   const prismaModel = model.charAt(0).toLowerCase() + model.slice(1);
   
   if (!prisma[prismaModel]) {
@@ -30,31 +25,39 @@ export async function GET(request, { params }) {
   const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.role === "admin";
   const isPublicRead = PUBLIC_READ_MODELS.map(m => m.toLowerCase()).includes(model.toLowerCase());
-
-  // Block access if not public and not admin
-  // Exception: Users might need to see their own Orders/Reservations, but standard generic API usually isn't granular enough.
-  // We'll stick to: Public Read OR Admin. 
-  // If a user needs to see "My Orders", we should use a specific API endpoint or a secure filter here.
-  // For now, let's allow "Order" and "Reservation" only if Admin. 
-  // Wait, frontend `userprofile/page.jsx` fetches Orders/Reservations.
-  // We need to allow it IF the query filters by the user's email/ID. 
-  // This is hard to enforce generically. 
-  // TEMPORARY: Allow Order/Reservation read if session exists (logged in user).
   const isLoggedIn = !!session;
   const isUserContent = ["Order", "Reservation"].map(m => m.toLowerCase()).includes(model.toLowerCase());
 
+  // Parse Query
+  const where = queryStr ? JSON.parse(queryStr) : {};
+
+  // SECURITY ENFORCEMENT
   if (!isPublicRead && !isAdmin) {
     if (isUserContent && isLoggedIn) {
-      // Allow, but we trust the frontend to filter? No, that's insecure. 
-      // Ideally we enforce the filter.
-      // For this "fix", we will allow logged-in users to read Orders/Reservations. 
-      // It's not perfect (User A can list User B's orders if they know the API), but better than Public.
+      // CRITICAL: Force filtering by user email if accessing User Content (Order/Reservation)
+      // This prevents User A from seeing User B's orders just by removing the filter in the URL.
+      // We assume orders/reservations have an 'email' field or similar linkage.
+      // Checking schema: Order has customer_email, Reservation has email.
+      
+      const userEmail = session.user.email;
+      
+      // If the query tries to filter by a DIFFERENT email (or no email), we block it or override it.
+      // Safer to Override: forcibly add email filter.
+      
+      if (model.toLowerCase() === "order") {
+        where.customer_email = userEmail; 
+      } else if (model.toLowerCase() === "reservation") {
+        where.email = userEmail;
+      } else {
+        // Should not happen given isUserContent definition, but safe fallback
+        return NextResponse.json({ error: "Unauthorized access to this model" }, { status: 403 });
+      }
+      
     } else {
        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   }
 
-  const where = queryStr ? JSON.parse(queryStr) : {};
   const take = limit ? parseInt(limit) : undefined;
   
   let orderBy = undefined;
