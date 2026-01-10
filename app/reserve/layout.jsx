@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Off-Grid | Reserve Your Spot",
-  description: "Secure your place at our next digital detox event.",
+  title: "OffGrid | Reserve Your Table",
+  description: "Join us for the next OffGrid experience.",
 };
 
 export default function ReserveLayout({ children }) {

@@ -28,6 +28,9 @@ function ReserveContent() {
 
   const createReservation = useMutation({
     mutationFn: async (data) => {
+      // 1. Capture the Lead in DB (Optional, but good for tracking)
+      // We assume the API still works to save "pending" reservations
+      // We pass 'seats' as 'tables' effectively.
       const response = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -35,6 +38,7 @@ function ReserveContent() {
           eventId,
           name: data.name,
           email: data.email,
+          phone: data.phone,
           seats: data.seats,
           instagram: data.instagram,
           twitter: data.twitter,
@@ -44,18 +48,45 @@ function ReserveContent() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to create reservation");
+         // Even if DB fails (e.g. full), we might still want to let them whatsapp?
+         // But for now let's strict fail if full.
+         // Actually, if we want to bypass stock check for WhatsApp manual processing:
+         // We might skip this API call or ignore error.
+         // But capturing data is requested.
+         const error = await response.json();
+         // If "Not enough seats", we tell user.
+         throw new Error(error.error || "Failed to create reservation");
       }
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       setIsSuccess(true);
       queryClient.invalidateQueries(["event", eventId]);
+      
+      // 2. Redirect to WhatsApp
+      const phone = "2348033448191"; // REAL ADMIN NUMBER
+      const text = `Hi, I'd like to buy a table for ${event?.title || "OffGrid Event"}.
+Name: ${variables.name}
+Email: ${variables.email}
+Phone: ${variables.phone}
+Tables: ${variables.seats}
+Role: ${variables.role}
+`;
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+      
+      // Short delay then redirect
+      setTimeout(() => {
+          window.open(url, "_blank");
+      }, 1500);
     },
   });
 
+  // Calculate Tables Left (Assuming total_seats = 7 tables for now, or just using seats logic)
+  // If event.total_seats was e.g. 50 (people), and now we want 7 tables.
+  // We should likely treat 'total_seats' as 'total_tables' in the UI if that's the new model.
+  // Or just ignore the count display if it's confusing.
+  // Let's assume for this MVP event, the DB 'total_seats' IS the table count (e.g. 7).
   const spotsLeft = event ? event.total_seats - (event.seats_taken || 0) : 0;
 
   return (
@@ -108,7 +139,7 @@ function ReserveContent() {
               className="lg:col-span-2"
             >
               <span className="text-black/30 text-xs tracking-[0.3em] block mb-4">
-                RESERVE
+                RESERVE TABLE
               </span>
               <h1 className="text-black text-3xl md:text-4xl font-extralight mb-8">
                 {event.title}
@@ -147,7 +178,7 @@ function ReserveContent() {
                   <span className="text-[#FF5401] text-2xl font-light">
                     {spotsLeft}
                   </span>
-                  <span className="text-black/40 text-sm">spots remaining</span>
+                  <span className="text-black/40 text-sm">tables remaining</span>
                 </div>
                 <div className="w-full h-1 bg-black/5 mt-3 overflow-hidden">
                   <motion.div
@@ -172,11 +203,10 @@ function ReserveContent() {
               {spotsLeft <= 0 && !isSuccess ? (
                 <div className="text-center py-12">
                   <h3 className="text-2xl font-light text-black mb-3">
-                    Fully Reserved
+                    Fully Booked
                   </h3>
                   <p className="text-black/50 text-sm">
-                    This event is at capacity. Follow us for updates on future
-                    editions.
+                    All tables have been reserved. Please check back later or contact us directly.
                   </p>
                 </div>
               ) : (

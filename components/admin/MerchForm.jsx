@@ -104,7 +104,7 @@ export default function MerchForm({
           </div>
           <div className="space-y-2">
             <Label className="text-black/60 text-xs tracking-wider">
-              PRICE (USD) *
+              PRICE (NGN) *
             </Label>
             <Input
               type="number"
@@ -113,7 +113,7 @@ export default function MerchForm({
               onChange={(e) => handleChange("price", e.target.value)}
               required
               className="bg-[#F5EDE4] border-black/10 rounded-none h-10 text-black placeholder:text-black/30"
-              placeholder="49.99"
+              placeholder="5000"
             />
           </div>
         </div>

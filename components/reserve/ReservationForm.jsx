@@ -29,11 +29,12 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     instagram: "",
     twitter: "",
     role: "",
     referral: "",
-    seats: 1,
+    seats: 1, // Will be treated as Tables
   });
 
   const handleChange = (field, value) => {
@@ -56,10 +57,10 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
           <Check className="w-8 h-8 text-white" />
         </div>
         <h3 className="text-2xl font-light text-black mb-3">
-          You're on the list.
+          Request Sent.
         </h3>
-        <p className="text-black/50 text-sm max-w-md mx-auto">
-          We'll be in touch with the details. Keep an eye on your inbox.
+        <p className="text-black/50 text-sm max-w-md mx-auto mb-6">
+          Redirecting you to WhatsApp to complete your table reservation...
         </p>
       </motion.div>
     );
@@ -93,6 +94,20 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
             placeholder="your@email.com"
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+          <Label className="text-black/60 text-xs tracking-wider">
+            PHONE NUMBER *
+          </Label>
+          <Input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => handleChange("phone", e.target.value)}
+            required
+            className="bg-transparent border-black/10 focus:border-[#FF5401] rounded-none h-12 text-black"
+            placeholder="+234..."
+          />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -156,7 +171,7 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
 
       <div className="space-y-2">
         <Label className="text-black/60 text-xs tracking-wider">
-          NUMBER OF SEATS
+          NUMBER OF TABLES *
         </Label>
         <Select
           value={String(formData.seats)}
@@ -166,29 +181,31 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1">1</SelectItem>
-            <SelectItem value="2">2</SelectItem>
+            <SelectItem value="1">1 Table</SelectItem>
+            <SelectItem value="2">2 Tables</SelectItem>
           </SelectContent>
         </Select>
+        <p className="text-black/30 text-xs mt-1">
+          Limited availability. Maximum 7 tables per event.
+        </p>
       </div>
 
       <Button
         type="submit"
         disabled={
-          isSubmitting || !formData.name || !formData.email || !formData.role
+          isSubmitting || !formData.name || !formData.email || !formData.phone || !formData.role
         }
         className="w-full bg-black hover:bg-[#FF5401] text-white rounded-none h-14 text-sm tracking-wider transition-colors duration-300"
       >
         {isSubmitting ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
-          "REQUEST RESERVATION"
+          "RESERVE TABLE VIA WHATSAPP"
         )}
       </Button>
 
       <p className="text-black/30 text-xs text-center">
-        Reservations are reviewed individually. We'll confirm your spot via
-        email.
+        You will be redirected to WhatsApp to complete your reservation payment.
       </p>
     </form>
   );

@@ -107,6 +107,7 @@ model Reservation {
   userId    String?  // Optional link to registered user
   name      String
   email     String
+  phone     String?
   instagram String?
   twitter   String?
   role      String?
@@ -114,7 +115,7 @@ model Reservation {
   status    String   @default("pending") // pending, confirmed, cancelled
   seats     Int      @default(1)
   
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   user      User?    @relation(fields: [userId], references: [id])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -141,7 +142,7 @@ model OrderItem {
   price     Float
   quantity  Int
 
-  order     Order   @relation(fields: [orderId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   merch     Merch   @relation(fields: [merchId], references: [id])
 }
 

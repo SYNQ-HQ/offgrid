@@ -124,7 +124,7 @@ export default function UserProfile() {
                   >
                     <div>
                       <p className="text-black text-sm font-medium">
-                        ${order.total_amount.toFixed(2)}
+                        ₦{order.total_amount.toFixed(2)}
                       </p>
                       <p className="text-black/50 text-xs">
                         {format(new Date(order.createdAt), "MMM d, yyyy")}
@@ -163,7 +163,7 @@ export default function UserProfile() {
               <div className="text-center py-12 bg-white border border-black/10 p-6">
                 <p className="text-black/50 mb-4">No reservations yet</p>
                 <Link
-                  href={createPageUrl("Home")}
+                  href={createPageUrl("#Events")}
                   className="text-[#FF5401] hover:text-black transition-colors text-sm"
                 >
                   Browse events →

@@ -68,7 +68,7 @@ export default function CartSidebar({ isOpen, onClose, cart, onUpdateCart }) {
                         {item.name}
                       </h4>
                       <p className="text-[#FF5401] text-sm mb-2">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ₦{(item.price * item.quantity).toFixed(2)}
                       </p>
                       <div className="flex items-center gap-2 bg-black/5 px-2 py-1 w-fit">
                         <button
@@ -110,7 +110,7 @@ export default function CartSidebar({ isOpen, onClose, cart, onUpdateCart }) {
                 <div className="flex justify-between items-center">
                   <span className="text-black/60">Total</span>
                   <span className="text-[#FF5401] text-xl font-light">
-                    ${total.toFixed(2)}
+                    ₦{total.toFixed(2)}
                   </span>
                 </div>
                 <Link

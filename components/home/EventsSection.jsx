@@ -63,7 +63,7 @@ export default function EventsSection() {
                 transition={{ duration: 0.8, delay: index * 0.1 }}
               >
                 <Link
-                  href={createPageUrl(`Reserve?eventId=${event.id}`)}
+                  href={`/reserve?eventId=${event.id}`}
                   className="block group"
                 >
                   <div className="border border-black/10 hover:border-[#FF5401] transition-colors duration-500 p-8 md:p-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">

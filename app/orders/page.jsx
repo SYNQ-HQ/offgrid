@@ -113,7 +113,7 @@ export default function Orders() {
                             {item.name} x{item.quantity}
                           </span>
                           <span className="text-black">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            ₦{(item.price * item.quantity).toFixed(2)}
                           </span>
                         </div>
                       ))}
@@ -126,7 +126,7 @@ export default function Orders() {
                         TOTAL
                       </p>
                       <p className="text-[#FF5401] text-xl font-light">
-                        ${order.total_amount.toFixed(2)}
+                        ₦{order.total_amount.toFixed(2)}
                       </p>
                     </div>
                     <div className="text-right">

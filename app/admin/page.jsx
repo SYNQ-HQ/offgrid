@@ -19,20 +19,26 @@ import {
   Trash2,
   FileText,
   ShoppingBag,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import MerchForm from "@/components/admin/MerchForm";
 import BlogForm from "@/components/admin/BlogForm";
+import EventForm from "@/components/admin/EventForm";
+import { useToast } from "@/components/ui/toast";
+import { ConfirmationModal } from "@/components/ui/modal";
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession({ required: true });
   const [activeTab, setActiveTab] = useState("overview");
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, type: null, id: null });
 
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { toast } = useToast();
 
   const isAdmin = session?.user?.role === "admin";
 
@@ -75,13 +81,55 @@ export default function AdminDashboard() {
     initialData: [],
   });
 
+  const { data: events = [] } = useQuery({
+    queryKey: ["admin-events"],
+    queryFn: () => apiClient.entities.Event.list("-date", 100),
+    enabled: isEnabled && activeTab === "events",
+    initialData: [],
+  });
+
   // Mutations
   const updateReservationMutation = useMutation({
     mutationFn: ({ id, status }) =>
       apiClient.entities.Reservation.update(id, { status }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["all-reservations"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-reservations"] });
+      toast({ title: "Success", description: "Reservation updated successfully", variant: "success" });
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "error" });
+    }
   });
+
+  const eventMutations = {
+    create: useMutation({
+      mutationFn: (data) => apiClient.entities.Event.create(data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+        setShowForm(false);
+        toast({ title: "Success", description: "Event created successfully", variant: "success" });
+      },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
+    }),
+    update: useMutation({
+      mutationFn: ({ id, data }) => apiClient.entities.Event.update(id, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+        setEditingItem(null);
+        setShowForm(false);
+        toast({ title: "Success", description: "Event updated successfully", variant: "success" });
+      },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
+    }),
+    delete: useMutation({
+      mutationFn: (id) => apiClient.entities.Event.delete(id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+        toast({ title: "Success", description: "Event deleted successfully", variant: "success" });
+      },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
+    }),
+  };
 
   const merchMutations = {
     create: useMutation({
@@ -89,7 +137,9 @@ export default function AdminDashboard() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["admin-merch"] });
         setShowForm(false);
+        toast({ title: "Success", description: "Merch item created successfully", variant: "success" });
       },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
     }),
     update: useMutation({
       mutationFn: ({ id, data }) => apiClient.entities.Merch.update(id, data),
@@ -97,13 +147,17 @@ export default function AdminDashboard() {
         queryClient.invalidateQueries({ queryKey: ["admin-merch"] });
         setEditingItem(null);
         setShowForm(false);
+        toast({ title: "Success", description: "Merch item updated successfully", variant: "success" });
       },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
     }),
     delete: useMutation({
       mutationFn: (id) => apiClient.entities.Merch.delete(id),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["admin-merch"] });
+        toast({ title: "Success", description: "Merch item deleted successfully", variant: "success" });
       },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
     }),
   };
 
@@ -113,7 +167,9 @@ export default function AdminDashboard() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["admin-blog"] });
         setShowForm(false);
+        toast({ title: "Success", description: "Blog post created successfully", variant: "success" });
       },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
     }),
     update: useMutation({
       mutationFn: ({ id, data }) =>
@@ -122,13 +178,17 @@ export default function AdminDashboard() {
         queryClient.invalidateQueries({ queryKey: ["admin-blog"] });
         setEditingItem(null);
         setShowForm(false);
+        toast({ title: "Success", description: "Blog post updated successfully", variant: "success" });
       },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
     }),
     delete: useMutation({
       mutationFn: (id) => apiClient.entities.BlogPost.delete(id),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["admin-blog"] });
+        toast({ title: "Success", description: "Blog post deleted successfully", variant: "success" });
       },
+      onError: (error) => toast({ title: "Error", description: error.message, variant: "error" }),
     }),
   };
 
@@ -141,6 +201,10 @@ export default function AdminDashboard() {
       if (editingItem)
         blogMutations.update.mutate({ id: editingItem.id, data });
       else blogMutations.create.mutate(data);
+    } else if (activeTab === "events") {
+      if (editingItem)
+        eventMutations.update.mutate({ id: editingItem.id, data });
+      else eventMutations.create.mutate(data);
     }
   };
 
@@ -150,10 +214,15 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = (id) => {
-    if (confirm("Are you sure?")) {
-      if (activeTab === "merch") merchMutations.delete.mutate(id);
-      else if (activeTab === "blog") blogMutations.delete.mutate(id);
-    }
+    setConfirmModal({ isOpen: true, type: activeTab, id });
+  };
+
+  const handleConfirmDelete = () => {
+    const { type, id } = confirmModal;
+    if (type === "merch") merchMutations.delete.mutate(id);
+    else if (type === "blog") blogMutations.delete.mutate(id);
+    else if (type === "events") eventMutations.delete.mutate(id);
+    setConfirmModal({ isOpen: false, type: null, id: null });
   };
 
   const handleCancel = () => {
@@ -184,12 +253,21 @@ export default function AdminDashboard() {
     { id: "overview", label: "Overview", icon: Users },
     { id: "orders", label: "Orders", icon: Package },
     { id: "reservations", label: "Reservations", icon: Ticket },
+    { id: "events", label: "Events", icon: Calendar },
     { id: "merch", label: "Merchandise", icon: ShoppingBag },
     { id: "blog", label: "Blog Posts", icon: FileText },
   ];
 
   return (
-    <div className="min-h-screen bg-[#F5EDE4] flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#F5EDE4] text-black flex flex-col md:flex-row">
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={handleConfirmDelete}
+        title="Delete Item"
+        description="Are you sure you want to delete this item? This action cannot be undone."
+      />
+
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-64 bg-white border-r border-black/10 md:min-h-screen">
         <div className="p-6 border-b border-black/10">
@@ -239,7 +317,7 @@ export default function AdminDashboard() {
                   REVENUE
                 </p>
                 <p className="text-3xl font-light">
-                  ${totalRevenue.toFixed(0)}
+                  ₦{totalRevenue.toFixed(0)}
                 </p>
               </div>
               <div className="bg-white border border-black/10 p-6">
@@ -290,7 +368,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-6">
                       <p className="font-light">
-                        ${order.total_amount.toFixed(2)}
+                        ₦{order.total_amount.toFixed(2)}
                       </p>
                       <span
                         className={`px-3 py-1 text-xs ${order.status === "completed" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
@@ -323,7 +401,7 @@ export default function AdminDashboard() {
                       <p className="text-xs text-black/50">{res.role}</p>
                     </div>
                     <div className="text-sm">
-                      {res.seats} Seat{res.seats > 1 ? "s" : ""}
+                      {res.seats} Table{res.seats > 1 ? "s" : ""}
                     </div>
                     <div>
                       <span
@@ -371,6 +449,85 @@ export default function AdminDashboard() {
                   </div>
                 ))
               )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Events Tab */}
+        {activeTab === "events" && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-extralight">Events</h2>
+              <Button
+                onClick={() => setShowForm(!showForm)}
+                className="bg-black hover:bg-[#FF5401] rounded-none"
+              >
+                <Plus className="w-4 h-4 mr-2" /> New Event
+              </Button>
+            </div>
+
+            <AnimatePresence>
+              {showForm && (
+                <div className="mb-8">
+                  <EventForm
+                    onSubmit={handleFormSubmit}
+                    isSubmitting={
+                      eventMutations.create.isPending ||
+                      eventMutations.update.isPending
+                    }
+                    onCancel={handleCancel}
+                    initialData={editingItem}
+                  />
+                </div>
+              )}
+            </AnimatePresence>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <div
+                  key={event.id}
+                  className="bg-white border border-black/10 p-4 group hover:border-[#FF5401] transition-colors"
+                >
+                  <div className="relative aspect-video mb-4 bg-black/5 overflow-hidden">
+                    {event.cover_image && (
+                      <img
+                        src={event.cover_image}
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleEdit(event)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(event.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <h3 className="font-light truncate text-lg">{event.title}</h3>
+                  <div className="text-xs text-black/50 mb-2">
+                     {format(new Date(event.date), "MMM d, yyyy")} • {event.time}
+                  </div>
+                  <div className="flex justify-between text-sm text-black/60 pt-2 border-t border-black/5">
+                    <span>{event.venue}</span>
+                    <span className={event.status === "upcoming" ? "text-green-600" : "text-black/40"}>
+                        {event.status.toUpperCase()}
+                    </span>
+                  </div>
+                   <div className="text-xs text-black/40 mt-2">
+                      {event.seats_taken} / {event.total_seats} Tables Booked
+                   </div>
+                </div>
+              ))}
             </div>
           </motion.div>
         )}
@@ -437,7 +594,7 @@ export default function AdminDashboard() {
                   </div>
                   <h3 className="font-light truncate">{item.name}</h3>
                   <div className="flex justify-between text-sm text-black/60 mt-1">
-                    <span>${item.price}</span>
+                    <span>₦{item.price}</span>
                     <span>Stock: {item.stock}</span>
                   </div>
                 </div>

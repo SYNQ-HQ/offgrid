@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Off-Grid Store | Merch",
-  description: "Curated gear for the intentional builder.",
+  title: "OffGrid Store | Merch",
+  description: "Official OffGrid merchandise and apparel.",
 };
 
 export default function MerchLayout({ children }) {

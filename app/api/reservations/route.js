@@ -76,8 +76,8 @@ export async function POST(request) {
         await transporter.sendMail({
             from: `"OffGrid" <${process.env.SMTP_FROM || "noreply@offgrid.com"}>`,
             to: email,
-            subject: "Reservation Submitted - OffGrid",
-            text: `Hi ${name},\n\nYour reservation for ${result.eventTitle} has been submitted for review.\n\nEvent: ${result.eventTitle}\nDate: ${result.eventDate}\nSeats: ${seats}\n\nWe'll confirm your spot soon.\n\nOffGrid Team`,
+            subject: "Table Reservation Request - OffGrid",
+            text: `Hi ${name},\n\nYour table reservation request for ${result.eventTitle} has been received.\n\nEvent: ${result.eventTitle}\nDate: ${result.eventDate}\nTables: ${seats}\nPhone: ${body.phone || 'N/A'}\n\nPlease complete your payment via WhatsApp if you haven't already. We'll confirm your reservation once payment is verified.\n\nOffGrid Team`,
         });
     } catch (emailErr) {
         console.error("Failed to send reservation email", emailErr);

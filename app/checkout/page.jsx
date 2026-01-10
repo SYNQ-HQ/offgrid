@@ -151,7 +151,7 @@ function CheckoutContent() {
                   {isProcessing ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
-                    `Pay $${total.toFixed(2)}`
+                    `Pay ₦${total.toFixed(2)}`
                   )}
                 </Button>
               </form>
@@ -172,7 +172,7 @@ function CheckoutContent() {
                           {item.name} <span className="text-black/30">x{item.quantity}</span>
                         </span>
                         <span className="text-black font-medium">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ₦{(item.price * item.quantity).toFixed(2)}
                         </span>
                       </div>
                     ))}
@@ -180,7 +180,7 @@ function CheckoutContent() {
                   <div className="flex justify-between items-center text-lg">
                     <span className="text-black font-light">Total</span>
                     <span className="text-[#FF5401] font-normal">
-                      ${total.toFixed(2)}
+                      ₦{total.toFixed(2)}
                     </span>
                   </div>
                 </div>

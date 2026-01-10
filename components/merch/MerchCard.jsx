@@ -45,7 +45,7 @@ export default function MerchCard({ item, onAddToCart, cartQuantity = 0 }) {
 
           <div className="flex items-center justify-between pt-4 border-t border-black/10">
             <span className="text-[#FF5401] text-lg font-light">
-              ${item.price.toFixed(2)}
+              ₦{item.price.toFixed(2)}
             </span>
             {cartQuantity > 0 ? (
               <div className="flex items-center gap-2 bg-black/5 px-3 py-2 rounded-none">
