@@ -3,7 +3,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import Providers from "@/components/providers";
 
 export const metadata = {
-  title: "Off-Grid",
+  title: "OffGrid",
   description: "Disconnect to Reconnect",
 };
 

@@ -42,8 +42,8 @@ function ReserveContent() {
       // Send confirmation email
       await base44.integrations.Core.SendEmail({
         to: data.email,
-        subject: "Reservation Submitted - Off-Grid",
-        body: `Hi ${data.name},\n\nYour reservation for ${event.title} has been submitted for review.\n\nEvent: ${event.title}\nDate: ${format(new Date(event.date), "MMMM d, yyyy")}\nSeats: ${data.seats}\n\nWe'll confirm your spot soon.\n\nOff-Grid Team`,
+        subject: "Reservation Submitted - OffGrid",
+        body: `Hi ${data.name},\n\nYour reservation for ${event.title} has been submitted for review.\n\nEvent: ${event.title}\nDate: ${format(new Date(event.date), "MMMM d, yyyy")}\nSeats: ${data.seats}\n\nWe'll confirm your spot soon.\n\nOffGrid Team`,
       });
       return reservation;
     },
@@ -67,7 +67,7 @@ function ReserveContent() {
           Back
         </Link>
         <div className="text-black font-light tracking-[0.3em] text-sm">
-          OFF-GRID
+          OffGrid
         </div>
       </nav>
 
@@ -193,7 +193,13 @@ function ReserveContent() {
 
 export default function Reserve() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F5EDE4] flex items-center justify-center text-black/50">Loading reservation...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F5EDE4] flex items-center justify-center text-black/50">
+          Loading reservation...
+        </div>
+      }
+    >
       <ReserveContent />
     </Suspense>
   );

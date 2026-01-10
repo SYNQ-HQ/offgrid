@@ -17,7 +17,7 @@ export default function FooterSection() {
         >
           <div>
             <h3 className="text-[#F5EDE4] text-4xl md:text-5xl font-extralight mb-6">
-              OFF-GRID
+              OFFGRID
             </h3>
             <p className="text-[#F5EDE4]/40 text-sm font-light max-w-md leading-relaxed">
               A private IRL culture event for tech builders to unplug, unwind,
@@ -90,7 +90,7 @@ export default function FooterSection() {
           className="mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4"
         >
           <p className="text-[#F5EDE4]/20 text-xs">
-            © {new Date().getFullYear()} Off-Grid. All rights reserved.
+            © {new Date().getFullYear()} OffGrid. All rights reserved.
           </p>
           <p className="text-[#F5EDE4]/20 text-xs">
             Not loud. Not everywhere. Just intentional.

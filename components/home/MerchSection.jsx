@@ -25,8 +25,8 @@ export default function MerchSection() {
               Gear for the intentional.
             </h2>
             <p className="text-black/50 text-sm leading-relaxed mb-8 max-w-md">
-              Curated merchandise that carries the Off-Grid energy. From apparel
-              to everyday essentials—each piece designed for builders who value
+              Curated merchandise that carries the OffGrid energy. From apparel
+              to everyday essentials-each piece designed for builders who value
               substance over noise.
             </p>
 

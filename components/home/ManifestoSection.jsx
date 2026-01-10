@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 
 export default function ManifestoSection() {
   const rules = [
-    "No pitching — if someone asks, keep it human.",
-    "Phones discouraged — be present.",
+    "No pitching - if someone asks, keep it human.",
+    "Phones discouraged - be present.",
     "No panels, no talks, no sponsors on stage.",
     "No forced networking games.",
     "Respect the room.",
@@ -32,9 +32,10 @@ export default function ManifestoSection() {
           </span>
           <h2 className="text-black text-3xl md:text-5xl lg:text-6xl font-extralight leading-[1.2] max-w-4xl">
             In a world where tech people are always online, pitching, building,
-            and performing—
+            and performing -
+            <br />{" "}
             <span className="font-normal">
-              Off-Grid creates a rare space
+              OffGrid creates a rare space
             </span>{" "}
             where real conversations happen.
           </h2>
@@ -77,7 +78,7 @@ export default function ManifestoSection() {
             className="flex flex-col justify-end"
           >
             <blockquote className="text-black text-2xl md:text-3xl font-extralight leading-relaxed border-l-2 border-black/20 pl-6">
-              "Off-Grid is not about escaping tech. It's about remembering the
+              "OffGrid is not about escaping tech. It's about remembering the
               humans behind it."
             </blockquote>
           </motion.div>

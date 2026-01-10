@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Upload } from "lucide-react";
 
 export default function MerchForm({
   onSubmit,
@@ -30,9 +31,35 @@ export default function MerchForm({
       category: "other",
     },
   );
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const body = new FormData();
+    body.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body,
+      });
+      const data = await res.json();
+      if (data.url) {
+        handleChange("image_url", data.url);
+      }
+    } catch (error) {
+      console.error("Upload failed", error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -72,7 +99,7 @@ export default function MerchForm({
               onChange={(e) => handleChange("name", e.target.value)}
               required
               className="bg-[#F5EDE4] border-black/10 rounded-none h-10"
-              placeholder="Off-Grid Hoodie"
+              placeholder="OffGrid Hoodie"
             />
           </div>
           <div className="space-y-2">
@@ -107,18 +134,40 @@ export default function MerchForm({
           <Label className="text-black/60 text-xs tracking-wider">
             IMAGE URL *
           </Label>
-          <Input
-            value={formData.image_url}
-            onChange={(e) => handleChange("image_url", e.target.value)}
-            required
-            className="bg-[#F5EDE4] border-black/10 rounded-none h-10"
-            placeholder="https://..."
-          />
+          <div className="flex gap-2">
+            <Input
+              value={formData.image_url}
+              onChange={(e) => handleChange("image_url", e.target.value)}
+              required
+              className="bg-[#F5EDE4] border-black/10 rounded-none h-10 flex-1"
+              placeholder="https://... or upload"
+            />
+            <input
+              type="file"
+              hidden
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept="image/*"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="border-black/10 rounded-none h-10 px-3"
+            >
+              {isUploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
           {formData.image_url && (
             <img
               src={formData.image_url}
               alt="Preview"
-              className="w-32 h-32 object-cover mt-2"
+              className="w-32 h-32 object-cover mt-2 border border-black/10"
             />
           )}
         </div>
@@ -171,7 +220,7 @@ export default function MerchForm({
           )}
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploading}
             className="flex-1 bg-black hover:bg-[#FF5401] text-white rounded-none h-10 transition-colors duration-300"
           >
             {isSubmitting ? (

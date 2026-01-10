@@ -39,7 +39,7 @@
     },
     "referral": {
       "type": "string",
-      "description": "Who referred them or how they heard about Off-Grid"
+      "description": "Who referred them or how they heard about OffGrid"
     },
     "status": {
       "type": "string",

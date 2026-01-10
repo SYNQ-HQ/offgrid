@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -9,7 +9,7 @@ import { base44 } from "@/api/base44Client";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
-  CardElement,
+  PaymentElement,
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
@@ -18,7 +18,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, AlertCircle, Loader2, Check } from "lucide-react";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_KEY || "");
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_KEY || "pk_test_placeholder",
+);
 
 function CheckoutForm({ cartData, onSuccess }) {
   const stripe = useStripe();
@@ -38,39 +40,58 @@ function CheckoutForm({ cartData, onSuccess }) {
     setIsProcessing(true);
     setError("");
 
-    const cardElement = elements.getElement(CardElement);
-    const { token, error: tokenError } = await stripe.createToken(cardElement);
-
-    if (tokenError) {
-      setError(tokenError.message);
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      setError(submitError.message);
       setIsProcessing(false);
       return;
     }
 
-    // Create order in database
-    const order = await base44.entities.Order.create({
-      stripe_payment_id: token.id,
-      customer_email: formData.email,
-      customer_name: formData.name,
-      items: cartData,
-      total_amount: cartData.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0,
-      ),
-      shipping_address: formData.address,
-      status: "completed",
+    // Confirm the payment
+    const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/checkout/success`,
+        payment_method_data: {
+          billing_details: {
+            name: formData.name,
+            email: formData.email,
+          },
+        },
+      },
+      redirect: "if_required",
     });
 
-    if (order) {
-      // Send confirmation email
-      await base44.integrations.Core.SendEmail({
-        to: formData.email,
-        subject: "Order Confirmed - Off-Grid Store",
-        body: `Hi ${formData.name},\n\nThank you for your order! Your purchase has been confirmed.\n\nOrder ID: ${order.id}\nTotal: $${order.total_amount.toFixed(2)}\n\nWe'll ship your items soon. Check your account to track your order.\n\nOff-Grid Team`,
+    if (confirmError) {
+      setError(confirmError.message);
+      setIsProcessing(false);
+      return;
+    }
+
+    if (paymentIntent.status === "succeeded") {
+      // Create order in database
+      const order = await base44.entities.Order.create({
+        stripe_payment_id: paymentIntent.id,
+        customer_email: formData.email,
+        customer_name: formData.name,
+        items: cartData,
+        total_amount: paymentIntent.amount / 100,
+        shipping_address: formData.address,
+        status: "completed",
       });
-      onSuccess();
-    } else {
-      setError("Failed to create order. Please try again.");
+
+      if (order) {
+        await base44.integrations.Core.SendEmail({
+          to: formData.email,
+          subject: "Order Confirmed - OffGrid Store",
+          body: `Hi ${formData.name},\n\nThank you for your order! Your purchase has been confirmed.\n\nOrder ID: ${order.id}\nTotal: $${order.total_amount.toFixed(2)}\n\nOffGrid Team`,
+        });
+        onSuccess();
+      } else {
+        setError(
+          "Payment succeeded but failed to save order. Please contact support.",
+        );
+      }
     }
 
     setIsProcessing(false);
@@ -116,24 +137,11 @@ function CheckoutForm({ cartData, onSuccess }) {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-black/60 text-xs tracking-wider">CARD *</Label>
+        <Label className="text-black/60 text-xs tracking-wider">
+          PAYMENT *
+        </Label>
         <div className="p-4 border border-black/10 rounded-none">
-          <CardElement
-            options={{
-              style: {
-                base: {
-                  fontSize: "16px",
-                  color: "#000000",
-                  "::placeholder": {
-                    color: "rgba(0,0,0,0.3)",
-                  },
-                },
-                invalid: {
-                  color: "#fa755a",
-                },
-              },
-            }}
-          />
+          <PaymentElement />
         </div>
       </div>
 
@@ -188,6 +196,20 @@ function CheckoutContent() {
   const cartDataStr = searchParams.get("cart");
   const cartData = cartDataStr ? JSON.parse(cartDataStr) : [];
   const [isSuccess, setIsSuccess] = useState(false);
+  const [clientSecret, setClientSecret] = useState("");
+
+  useEffect(() => {
+    if (cartData.length > 0) {
+      fetch("/api/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cartData }),
+      })
+        .then((res) => res.json())
+        .then((data) => setClientSecret(data.clientSecret))
+        .catch((err) => console.error("Failed to create payment intent", err));
+    }
+  }, []);
 
   if (!cartData || cartData.length === 0) {
     return (
@@ -243,12 +265,18 @@ function CheckoutContent() {
             <div className="grid md:grid-cols-3 gap-8">
               {/* Order Summary */}
               <div className="md:col-span-2">
-                <Elements stripe={stripePromise}>
-                  <CheckoutForm
-                    cartData={cartData}
-                    onSuccess={() => setIsSuccess(true)}
-                  />
-                </Elements>
+                {clientSecret ? (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <CheckoutForm
+                      cartData={cartData}
+                      onSuccess={() => setIsSuccess(true)}
+                    />
+                  </Elements>
+                ) : (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-black/20" />
+                  </div>
+                )}
               </div>
 
               {/* Order Summary Sidebar */}
@@ -290,7 +318,13 @@ function CheckoutContent() {
 
 export default function Checkout() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F5EDE4] flex items-center justify-center text-black/50">Loading checkout...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F5EDE4] flex items-center justify-center text-black/50">
+          Loading checkout...
+        </div>
+      }
+    >
       <CheckoutContent />
     </Suspense>
   );

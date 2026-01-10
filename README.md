@@ -1,4 +1,4 @@
-# Off-Grid Next.js Migration
+# OffGrid Next.js Migration
 
 This project has been migrated from a React SPA (with base44 backend) to a **Next.js 16** application with **Prisma** (SQLite) and self-hosted API routes.
 

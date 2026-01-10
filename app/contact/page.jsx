@@ -26,8 +26,8 @@ export default function Contact() {
       // Send confirmation to user
       await base44.integrations.Core.SendEmail({
         to: formData.email,
-        subject: `Off-Grid: We received your message`,
-        body: `Hi ${formData.name},\n\nThank you for reaching out. We'll get back to you soon.\n\nOff-Grid Team`,
+        subject: `OffGrid: We received your message`,
+        body: `Hi ${formData.name},\n\nThank you for reaching out. We'll get back to you soon.\n\nOffGrid Team`,
       });
 
       // Get admin users to notify

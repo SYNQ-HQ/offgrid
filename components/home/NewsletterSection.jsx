@@ -18,7 +18,7 @@ export default function NewsletterSection() {
             Stay in the loop
           </h2>
           <p className="text-[#F5EDE4]/50 text-sm mb-8 max-w-md mx-auto">
-            Get updates on Off-Grid events, stories, and culture delivered to
+            Get updates on OffGrid events, stories, and culture delivered to
             your inbox.
           </p>
 

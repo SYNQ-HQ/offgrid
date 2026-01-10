@@ -35,7 +35,7 @@ export default function Terms() {
                 1. Acceptance of Terms
               </h2>
               <p>
-                By accessing and using the Off-Grid website and services, you
+                By accessing and using the OffGrid website and services, you
                 accept and agree to be bound by the terms and provision of this
                 agreement. If you do not agree to abide by the above, please do
                 not use this service.
@@ -58,7 +58,7 @@ export default function Terms() {
                 3. Intellectual Property Rights
               </h2>
               <p>
-                Unless otherwise stated, Off-Grid owns the intellectual property
+                Unless otherwise stated, OffGrid owns the intellectual property
                 rights for all material on this website. All intellectual
                 property rights are reserved. You may view and print pages from
                 the website for personal use, subject to restrictions set in
@@ -71,7 +71,7 @@ export default function Terms() {
                 4. Limitations of Liability
               </h2>
               <p>
-                In no event shall Off-Grid, nor any of its officers, directors
+                In no event shall OffGrid, nor any of its officers, directors
                 and employees, be liable to you for anything arising out of or
                 in any way connected with your use of this website.
               </p>
@@ -83,7 +83,7 @@ export default function Terms() {
               </h2>
               <p>
                 These terms and conditions are governed by and construed in
-                accordance with the laws of the jurisdiction in which Off-Grid
+                accordance with the laws of the jurisdiction in which OffGrid
                 operates, and you irrevocably submit to the exclusive
                 jurisdiction of the courts located in that location.
               </p>

@@ -25,7 +25,7 @@ export default function HeroSection() {
         className="flex justify-between items-center px-6 md:px-12 py-8 relative z-10"
       >
         <div className="text-[#F5EDE4] font-light tracking-[0.3em] text-sm">
-          OFF-GRID
+          OFFGRID
         </div>
         <div className="hidden md:flex gap-12 text-[#F5EDE4]/60 text-xs tracking-[0.2em]">
           <a
@@ -77,7 +77,7 @@ export default function HeroSection() {
           className="text-center"
         >
           <h1 className="text-[#F5EDE4] text-[12vw] md:text-[8vw] font-extralight tracking-[-0.02em] leading-[0.9]">
-            OFF-GRID
+            OFFGRID
           </h1>
           <motion.div
             initial={{ width: 0 }}
@@ -93,7 +93,8 @@ export default function HeroSection() {
           transition={{ duration: 0.8, delay: 1.2 }}
           className="text-[#F5EDE4]/50 text-sm md:text-base font-light tracking-[0.15em] mt-12 text-center max-w-md"
         >
-          NO WI-FI. NO PITCHING. JUST BUILDERS AND VIBES.
+          {/* NO WI-FI. NO PITCHING. JUST BUILDERS AND VIBES. */}
+          NO SCREENS. NO STANDUP. JUST BUILDERS AND VIBES.
         </motion.p>
       </div>
 

@@ -30,8 +30,8 @@ export default function NewsletterForm() {
       // Send welcome email
       await base44.integrations.Core.SendEmail({
         to: email,
-        subject: "Welcome to Off-Grid Newsletter",
-        body: `Welcome to the Off-Grid community!\n\nYou're now subscribed to our newsletter. We'll share updates, stories, and exclusive content about Off-Grid events and culture.\n\nOff-Grid Team`,
+        subject: "Welcome to OffGrid Newsletter",
+        body: `Welcome to the OffGrid community!\n\nYou're now subscribed to our newsletter. We'll share updates, stories, and exclusive content about OffGrid events and culture.\n\nOffGrid Team`,
       });
 
       setIsSuccess(true);

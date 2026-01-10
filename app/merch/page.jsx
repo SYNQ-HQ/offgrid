@@ -77,7 +77,7 @@ export default function Merch() {
           Back
         </Link>
         <div className="text-black font-light tracking-[0.3em] text-sm">
-          OFF-GRID STORE
+          OFFGRID STORE
         </div>
         <button
           onClick={() => setIsCartOpen(true)}
@@ -108,7 +108,7 @@ export default function Merch() {
           </h1>
           <p className="text-black/50 text-sm max-w-lg">
             Curated gear for the intentional builder. Every piece carries the
-            Off-Grid energy.
+            OffGrid energy.
           </p>
         </motion.div>
 

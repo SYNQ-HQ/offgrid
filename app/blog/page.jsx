@@ -43,10 +43,10 @@ export default function Blog() {
             BLOG
           </span>
           <h1 className="text-black text-4xl md:text-5xl font-extralight mb-4">
-            Off-Grid Stories
+            OffGrid Stories
           </h1>
           <p className="text-black/50 text-sm max-w-lg mb-12">
-            Insights and updates from the Off-Grid community
+            Insights and updates from the OffGrid community
           </p>
 
           {isLoading ? (

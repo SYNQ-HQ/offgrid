@@ -56,7 +56,7 @@ export default function Orders() {
             Order History
           </h1>
           <p className="text-black/50 text-sm mb-12">
-            Track all your Off-Grid store purchases
+            Track all your OffGrid store purchases
           </p>
 
           {isLoading ? (
