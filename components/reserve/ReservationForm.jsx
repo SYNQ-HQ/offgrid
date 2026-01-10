@@ -60,8 +60,8 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
         <h3 className="text-2xl font-light text-black mb-3">Request Sent.</h3>
         <p className="text-black/50 text-sm max-w-md mx-auto mb-6">
           {formData.type === "table"
-            ? "Redirecting you to WhatsApp to complete your table reservation..."
-            : "Redirecting you to WhatsApp to confirm your free ticket..."}
+            ? "Redirecting you to WhatsApp to complete your table reservation and payment..."
+            : "Redirecting you to WhatsApp. Please note that free tickets require manual approval by the team."}
         </p>
       </motion.div>
     );
@@ -71,9 +71,16 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Reservation Type Selection */}
       <div className="space-y-4">
-        <Label className="text-black/60 text-xs tracking-wider uppercase">
-          RESERVATION TYPE *
-        </Label>
+        <div className="flex justify-between items-end">
+          <Label className="text-black/60 text-xs tracking-wider uppercase">
+            RESERVATION TYPE *
+          </Label>
+          <span className="text-[10px] text-[#FF5401] tracking-widest font-medium uppercase">
+            {formData.type === "ticket"
+              ? "Requires Approval"
+              : "Instant Approval"}
+          </span>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <button
             type="button"
@@ -98,6 +105,11 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
             PAID TABLE
           </button>
         </div>
+        <p className="text-[11px] text-black/40 leading-relaxed italic">
+          {formData.type === "ticket"
+            ? "Note: Free tickets are limited and subject to approval. Registration does not guarantee entry."
+            : "Note: Tables are reserved upon successful payment verification via WhatsApp."}
+        </p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -220,7 +232,7 @@ export default function ReservationForm({ onSubmit, isSubmitting, isSuccess }) {
             </SelectContent>
           </Select>
           <p className="text-black/30 text-xs mt-1">
-            Limited availability. Maximum 7 tables per event.
+            Limited availability. Maximum 10 tables per event.
           </p>
         </div>
       )}

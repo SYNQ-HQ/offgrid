@@ -45,12 +45,14 @@ export default function ReserveClient({ event, eventId }) {
       const phone = "2348033448191"; 
       const isTable = variables.type === "table";
       const text = `Hi, I'd like to register for ${event?.title || "OffGrid Event"}.
-Type: ${isTable ? "Paid Table" : "Free Ticket"}
+Type: ${isTable ? "Paid Table (Instant Approval)" : "Free Ticket (Subject to Approval)"}
 Name: ${variables.name}
 Email: ${variables.email}
 Phone: ${variables.phone}
 ${isTable ? `Tables: ${variables.seats}` : ""}
 Role: ${variables.role}
+
+${isTable ? "I'm ready to proceed with payment." : "I understand my ticket requires manual approval."}
 `;
       const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
       
