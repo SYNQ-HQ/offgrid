@@ -24,7 +24,7 @@ export async function POST(request) {
 
     // Start a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Get Event to check seats
+      // 1. Get Event
       const event = await tx.event.findUnique({
         where: { id: eventId },
       });
@@ -33,17 +33,20 @@ export async function POST(request) {
         throw new Error("Event not found");
       }
 
-      if (event.seats_taken + seats > event.total_seats) {
-        throw new Error("Not enough seats available");
+      const isTable = type === "table";
+
+      // 2. Capacity Check (Only for Tables)
+      if (isTable && event.seats_taken + seats > event.total_seats) {
+        throw new Error("Not enough tables available");
       }
 
-      // 2. Create Reservation
+      // 3. Create Reservation
       const reservation = await tx.reservation.create({
         data: {
           eventId,
           name,
           email,
-          seats,
+          seats: isTable ? seats : 1, // Tickets default to 1 unit
           type,
           phone,
           instagram,
@@ -53,15 +56,17 @@ export async function POST(request) {
         },
       });
 
-      // 3. Update Event Seats
-      await tx.event.update({
-        where: { id: eventId },
-        data: {
-          seats_taken: {
-            increment: seats,
+      // 4. Update Event Capacity (Only for Tables)
+      if (isTable) {
+        await tx.event.update({
+          where: { id: eventId },
+          data: {
+            seats_taken: {
+              increment: seats,
+            },
           },
-        },
-      });
+        });
+      }
 
       return { reservation, eventTitle: event.title, eventDate: event.date };
     });
