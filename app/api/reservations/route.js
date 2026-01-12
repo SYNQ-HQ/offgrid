@@ -117,23 +117,23 @@ export async function POST(request) {
         console.log("Using Ethereal (Reservation):", testAccount.user);
       }
 
-      const isTable = body.type === "table";
+      const isTable = type === "table";
       const typeLabel = isTable ? "Table" : "Ticket";
 
       const htmlContent = getReservationEmailTemplate({
         name,
         eventTitle: result.eventTitle,
         eventDate: result.eventDate,
-        type: body.type,
+        type: type,
         seats,
-        phone: body.phone,
+        phone: phone,
       });
 
       await transporter.sendMail({
         from: `"OffGrid" <${process.env.SMTP_FROM || "noreply@offgrid.com"}>`,
         to: email,
         subject: `${typeLabel} Registration - OffGrid`,
-        text: `Hi ${name},\n\nYour ${typeLabel.toLowerCase()} registration request for ${result.eventTitle} has been received.\n\nEvent: ${result.eventTitle}\nDate: ${result.eventDate}\n${isTable ? `Tables: ${seats}\n` : ""}Phone: ${body.phone || "N/A"}\n\n${isTable ? "Please complete your payment via WhatsApp if you haven't already. We'll confirm your reservation once payment is verified." : "Please confirm your entry via WhatsApp."}\n\nOffGrid Team`,
+        text: `Hi ${name},\n\nYour ${typeLabel.toLowerCase()} registration request for ${result.eventTitle} has been received.\n\nEvent: ${result.eventTitle}\nDate: ${result.eventDate}\n${isTable ? `Tables: ${seats}\n` : ""}Phone: ${phone || "N/A"}\n\n${isTable ? "Please complete your payment via WhatsApp if you haven't already. We'll confirm your reservation once payment is verified." : "Please confirm your entry via WhatsApp."}\n\nOffGrid Team`,
         html: htmlContent,
       });
     } catch (emailErr) {
