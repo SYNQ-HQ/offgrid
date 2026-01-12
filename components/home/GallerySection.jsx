@@ -89,7 +89,7 @@ export default function GallerySection() {
               transition={{ duration: 0.8, delay: index * 0.1 }}
               className={`relative overflow-hidden group ${
                 index === 0 || index === 5
-                  ? "md:col-span-2 aspect-[2/1]"
+                  ? "md:col-span-2 aspect-2/1"
                   : "aspect-square"
               }`}
             >
