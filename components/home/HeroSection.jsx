@@ -309,7 +309,8 @@ export default function HeroSection() {
           className="mt-12"
         >
           <Link
-            href={reserveLink}
+            // href={reserveLink}
+            href={"https://luma.com/0apt9j4h"}
             className="inline-block border border-[#FF5401] rounded-full text-[#FF5401] hover:bg-[#FF5401] hover:text-white px-8 py-3 text-sm tracking-[0.2em] transition-all duration-300"
           >
             RESERVE SPACE
