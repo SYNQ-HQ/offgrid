@@ -5,8 +5,10 @@ import { apiClient } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, Check } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 
 export default function NewsletterForm() {
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -35,10 +37,20 @@ export default function NewsletterForm() {
       });
 
       setIsSuccess(true);
+      toast({
+        title: "Subscribed!",
+        description: "Welcome to the OffGrid community.",
+        variant: "success",
+      });
       setEmail("");
       setTimeout(() => setIsSuccess(false), 3000);
     } catch (err) {
       setError("Something went wrong. Please try again.");
+      toast({
+        title: "Subscription failed",
+        description: "Please try again later.",
+        variant: "error",
+      });
     }
 
     setIsLoading(false);

@@ -13,6 +13,7 @@ export async function GET(request, { params }) {
   const { searchParams } = new URL(request.url);
   const sort = searchParams.get("sort");
   const limit = searchParams.get("limit");
+  const page = searchParams.get("page");
   const queryStr = searchParams.get("query");
   
   const prismaModel = model.charAt(0).toLowerCase() + model.slice(1);
@@ -34,22 +35,13 @@ export async function GET(request, { params }) {
   // SECURITY ENFORCEMENT
   if (!isPublicRead && !isAdmin) {
     if (isUserContent && isLoggedIn) {
-      // CRITICAL: Force filtering by user email if accessing User Content (Order/Reservation)
-      // This prevents User A from seeing User B's orders just by removing the filter in the URL.
-      // We assume orders/reservations have an 'email' field or similar linkage.
-      // Checking schema: Order has customer_email, Reservation has email.
-      
       const userEmail = session.user.email;
-      
-      // If the query tries to filter by a DIFFERENT email (or no email), we block it or override it.
-      // Safer to Override: forcibly add email filter.
       
       if (model.toLowerCase() === "order") {
         where.customer_email = userEmail; 
       } else if (model.toLowerCase() === "reservation") {
         where.email = userEmail;
       } else {
-        // Should not happen given isUserContent definition, but safe fallback
         return NextResponse.json({ error: "Unauthorized access to this model" }, { status: 403 });
       }
       
@@ -59,6 +51,7 @@ export async function GET(request, { params }) {
   }
 
   const take = limit ? parseInt(limit) : undefined;
+  const skip = page && take ? (parseInt(page) - 1) * take : undefined;
   
   let orderBy = undefined;
   if (sort) {
@@ -69,13 +62,44 @@ export async function GET(request, { params }) {
   }
 
   try {
+    // If page is provided, we return a paginated response structure
+    if (page) {
+        const [data, total] = await prisma.$transaction([
+            prisma[prismaModel].findMany({
+                where,
+                take,
+                skip,
+                orderBy,
+            }),
+            prisma[prismaModel].count({ where }),
+        ]);
+
+        let sanitizedData = data;
+        if (model.toLowerCase() === "user") {
+            sanitizedData = data.map(user => {
+                const { password, ...rest } = user;
+                return rest;
+            });
+        }
+
+        return NextResponse.json({
+            data: sanitizedData,
+            meta: {
+                total,
+                page: parseInt(page),
+                limit: take,
+                totalPages: Math.ceil(total / take)
+            }
+        });
+    }
+
+    // Default legacy behavior (just return array)
     const data = await prisma[prismaModel].findMany({
       where,
       take,
       orderBy,
     });
 
-    // 3. Sanitize Sensitive Data
     if (model.toLowerCase() === "user") {
       const sanitized = data.map(user => {
         const { password, ...rest } = user;

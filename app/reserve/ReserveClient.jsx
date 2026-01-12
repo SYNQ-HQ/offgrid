@@ -1,16 +1,30 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { createPageUrl } from "@/lib/utils";
+import { apiClient } from "@/lib/api";
 import { format } from "date-fns";
 import { ArrowLeft, Calendar, MapPin } from "lucide-react";
 import ReservationForm from "@/components/reserve/ReservationForm";
 
-export default function ReserveClient({ event, eventId }) {
+export default function ReserveClient({ event: initialEvent, eventId }) {
   const queryClient = useQueryClient();
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const { data: eventData } = useQuery({
+    queryKey: ["event", eventId],
+    queryFn: async () => {
+      const events = await apiClient.entities.Event.filter({ id: eventId });
+      return events[0] || null;
+    },
+    initialData: initialEvent,
+    refetchInterval: 5000,
+    enabled: !!eventId
+  });
+
+  const event = eventData || initialEvent;
 
   const createReservation = useMutation({
     mutationFn: async (data) => {

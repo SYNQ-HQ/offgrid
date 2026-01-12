@@ -7,8 +7,10 @@ import { createPageUrl } from "@/lib/utils";
 import { ArrowLeft, Loader2, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 
 export default function Contact() {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,14 +31,26 @@ export default function Contact() {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        throw new Error(data.error || "Failed to send message");
       }
 
       setIsSuccess(true);
+      toast({
+        title: "Message sent",
+        description: "We've received your message and will get back to you soon.",
+        variant: "success",
+      });
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (error) {
       console.error("Error sending email:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "error",
+      });
     }
 
     setIsSubmitting(false);

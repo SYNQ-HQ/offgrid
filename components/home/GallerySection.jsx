@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
+import Image from "next/image";
 
 export default function GallerySection() {
   const { data: images = [] } = useQuery({
@@ -51,7 +52,14 @@ export default function GallerySection() {
     },
   ];
 
-  const displayImages = images.length > 0 ? images : placeholderImages;
+  const displayImages = React.useMemo(() => {
+    if (images.length === 0) return placeholderImages;
+    if (images.length >= 6) return images.slice(0, 6); // Take top 6
+
+    // Fill remaining spots with placeholders
+    const needed = 6 - images.length;
+    return [...images, ...placeholderImages.slice(0, needed)];
+  }, [images]);
 
   return (
     <section className="bg-black py-24 md:py-32 px-6 md:px-12">
@@ -85,12 +93,14 @@ export default function GallerySection() {
                   : "aspect-square"
               }`}
             >
-              <img
+              <Image
                 src={image.url || image.image_url}
                 alt={image.caption || "OffGrid moment"}
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               {image.caption && (
                 <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                   <p className="text-[#F5EDE4] text-sm font-light tracking-wide">

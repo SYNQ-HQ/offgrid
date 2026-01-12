@@ -128,13 +128,26 @@ export default function AdminDashboard() {
   const updateReservationMutation = useMutation({
     mutationFn: ({ id, status }) =>
       apiClient.entities.Reservation.update(id, { status }),
-    onSuccess: () => {
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ["all-reservations"] });
+      const previousReservations = queryClient.getQueryData(["all-reservations"]);
+      
+      queryClient.setQueryData(["all-reservations"], (old) =>
+        old.map((res) => (res.id === id ? { ...res, status } : res))
+      );
+      
+      return { previousReservations };
+    },
+    onError: (err, newTodo, context) => {
+      queryClient.setQueryData(["all-reservations"], context.previousReservations);
+      toast({ title: "Error", description: err.message, variant: "error" });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["all-reservations"] });
+    },
+    onSuccess: () => {
       toast({ title: "Success", description: "Reservation updated successfully", variant: "success" });
     },
-    onError: (error) => {
-      toast({ title: "Error", description: error.message, variant: "error" });
-    }
   });
 
   const eventMutations = {
@@ -322,6 +335,14 @@ export default function AdminDashboard() {
     (r) => r.status === "pending",
   ).length;
 
+  const totalTables = reservations
+    .filter((r) => r.type === "table")
+    .reduce((sum, r) => sum + r.seats, 0);
+  
+  const totalTickets = reservations
+    .filter((r) => r.type === "ticket")
+    .length;
+
   if (status === "loading" || !session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5EDE4]">
@@ -397,32 +418,38 @@ export default function AdminDashboard() {
         {activeTab === "overview" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <h2 className="text-3xl font-extralight mb-8">Overview</h2>
-            <div className="grid md:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-12">
               <div className="bg-white border border-black/10 p-6">
                 <p className="text-xs text-black/40 tracking-wider mb-2">
-                  REVENUE
+                  STORE REVENUE
                 </p>
-                <p className="text-3xl font-light">
+                <p className="text-2xl md:text-3xl font-light">
                   ₦{totalRevenue.toFixed(0)}
                 </p>
               </div>
               <div className="bg-white border border-black/10 p-6">
                 <p className="text-xs text-black/40 tracking-wider mb-2">
-                  ORDERS
+                  STORE ORDERS
                 </p>
-                <p className="text-3xl font-light">{orders.length}</p>
+                <p className="text-2xl md:text-3xl font-light">{orders.length}</p>
               </div>
               <div className="bg-white border border-black/10 p-6">
                 <p className="text-xs text-black/40 tracking-wider mb-2">
-                  RESERVATIONS
+                  TABLES BOOKED
                 </p>
-                <p className="text-3xl font-light">{reservations.length}</p>
+                <p className="text-2xl md:text-3xl font-light text-blue-600">{totalTables}</p>
               </div>
               <div className="bg-white border border-black/10 p-6">
+                <p className="text-xs text-black/40 tracking-wider mb-2">
+                  FREE TICKETS
+                </p>
+                <p className="text-2xl md:text-3xl font-light text-green-600">{totalTickets}</p>
+              </div>
+              <div className="bg-white border border-black/10 p-6 col-span-2 md:col-span-1">
                 <p className="text-xs text-black/40 tracking-wider mb-2">
                   PENDING ACTIONS
                 </p>
-                <p className="text-3xl font-light text-[#FF5401]">
+                <p className="text-2xl md:text-3xl font-light text-[#FF5401]">
                   {pendingOrders + pendingReservations}
                 </p>
               </div>

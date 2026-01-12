@@ -41,6 +41,7 @@ export default function Merch() {
     queryKey: ["merch"],
     queryFn: () => apiClient.entities.Merch.list("-createdAt", 50),
     initialData: [],
+    refetchInterval: 5000,
   });
 
   const categories = ["all", "apparel", "accessories", "drinkware", "other"];
