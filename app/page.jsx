@@ -15,9 +15,9 @@ export default function Home() {
       {/* <ExperienceSection />*/}
       {/* <GallerySection />*/}
       {/* <EventsSection />*/}
-      {/* <div id="store">
+      <div id="store">
         <MerchSection />
-      </div>*/}
+      </div>
       {/* <NewsletterSection />*/}
       <FooterSection />
     </main>
