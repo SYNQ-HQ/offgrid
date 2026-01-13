@@ -220,27 +220,27 @@ export default function MerchSection() {
       <div className="max-w-7xl mx-auto px-6 md:px-12 mb-24">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1 border border-white/5 bg-white/5 p-1">
           <MerchItem
-            imgFront="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop"
-            imgBack="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"
-            title="CORE_TEE"
+            imgFront="/merch/polo-01-front.png"
+            imgBack="/merch/polo-01-back.png"
+            title="ESSENTIAL_POLO"
             delay={0.1}
           />
           <MerchItem
-            imgFront="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800&auto=format&fit=crop"
-            imgBack="https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop"
-            title="HOODIE_01"
+            imgFront="/merch/polo-02-front.png"
+            imgBack="/merch/polo-02-back.png"
+            title="SIGNATURE_POLO"
             delay={0.2}
           />
           <MerchItem
-            imgFront="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"
-            imgBack="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop"
-            title="FIELD_CAP"
+            imgFront="/merch/tee-01-front.png"
+            imgBack="/merch/tee-01-back.png"
+            title="CORE_TEE"
             delay={0.3}
           />
           <MerchItem
-            imgFront="https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop"
-            imgBack="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=800&auto=format&fit=crop"
-            title="SYSTEM_CREW"
+            imgFront="/merch/tee-02-front.png"
+            imgBack="/merch/tee-02-back.png"
+            title="SYSTEM_TEE"
             delay={0.4}
           />
         </div>
