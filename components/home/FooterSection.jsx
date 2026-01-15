@@ -142,13 +142,22 @@ export default function FooterSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-24 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4"
+          className="mt-24 pt-8 border-t border-white/5 flex flex-wrap justify-center items-center gap-4 md:justify-between"
         >
-          <p className="text-[#F5EDE4]/20 text-xs">
+          <p className="text-[#F5EDE4]/20 text-xs w-full md:w-auto text-center md:text-left">
             © {new Date().getFullYear()} OffGrid. All rights reserved.
           </p>
-          <p className="text-[#F5EDE4]/20 text-xs">
+          <p className="text-[#F5EDE4]/20 text-xs w-full md:w-auto text-center">
             Not loud. Not everywhere. Just intentional.
+          </p>
+          <p className="text-[#F5EDE4]/20 text-xs w-full md:w-auto text-center md:text-right">
+            Built and Designed by{" "}
+            <a
+              href="https://x.com/thesavioureking"
+              className="hover:text-[#FF5401] transition-colors duration-300"
+            >
+              TheSaviourEking
+            </a>
           </p>
         </motion.div>
       </div>
