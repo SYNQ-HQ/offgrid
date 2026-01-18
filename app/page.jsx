@@ -5,6 +5,7 @@ import GallerySection from "@/components/home/GallerySection";
 import EventsSection from "@/components/home/EventsSection";
 import MerchSection from "@/components/home/MerchSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
+import PartnersSection from "@/components/home/PartnersSection";
 import FooterSection from "@/components/home/FooterSection";
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
         <MerchSection />
       </div>
       {/* <NewsletterSection />*/}
+      <PartnersSection />
       <FooterSection />
     </main>
   );
